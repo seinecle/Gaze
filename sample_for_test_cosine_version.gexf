@@ -1,0 +1,4 @@
+<edge source = "Vincent" target = "Clement" weight = "0.8918255796034608"/>
+<edge source = "Vincent" target = "Caroline" weight = "0.12308354712764996"/>
+<edge source = "Clement" target = "Caroline" weight = "0.49346377060440877"/>
+<edge source = "Clement" target = "Sixte" weight = "0.08908708195444003"/>

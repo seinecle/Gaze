@@ -14,6 +14,8 @@ import java.util.Map.Entry;
 import java.util.*;
 import levallois.clement.utils.Clock;
 import no.uib.cipr.matrix.sparse.SparseVector;
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
 
 /**
  *
@@ -28,13 +30,14 @@ public class Transformer {
     private HashSet<String> setSources = new HashSet();
     private HashSet<String> setTargets = new HashSet();
     private TreeSet<Short> setSourcesShort = new TreeSet();
-    private TreeSet<Short> setTargetsShort = new TreeSet();
+    public static TreeSet<Short> setTargetsShort = new TreeSet();
     public static HashMultiset<Short> multisetTargets = HashMultiset.create();
     public static HashMultiset<Short> multisetSources = HashMultiset.create();
     public static HashBiMap<String, Short> mapNodes = HashBiMap.create();
     public static HashBiMap<String, Short> mapSources = HashBiMap.create();
     public static HashBiMap<String, Short> mapTargets = HashBiMap.create();
     public static TreeMultimap<Short, Short> map = TreeMultimap.create();
+    public static TreeMultimap<Short, Short> mapUndirected = TreeMultimap.create();
     public static TreeMultimap<Short, Short> mapInverse = TreeMultimap.create();
     private String sourceNode;
     private String targetNode;
@@ -44,7 +47,9 @@ public class Transformer {
     public static SparseVector[] listVectors;
     private static Iterator<Short> nodesIt;
     private static SparseVector vectorMJT;
-
+    public static HashMap<Short,Integer> mapBetweenness;
+    
+    
     Transformer(String str) {
 
         this.str = str;
@@ -84,6 +89,7 @@ public class Transformer {
 
             if (newNode2) {
                 mapNodes.put(targetNode, n);
+
                 n++;
             }
 
@@ -101,8 +107,11 @@ public class Transformer {
                 if (newTarget) {
                     mapTargets.put(targetNode, t);
                     setTargetsShort.add(t);
+                    
                     t++;
                 }
+                multisetTargets.add(mapNodes.get(targetNode));
+
             }
 
 //            if (weight < 0.0001) {
@@ -112,9 +121,10 @@ public class Transformer {
 
             if (Main.directedNetwork) {
                 map.put(mapSources.get(sourceNode), mapTargets.get(targetNode));
+                mapUndirected.put(mapNodes.get(sourceNode), mapNodes.get(targetNode));
 //                System.out.println("put in the map: --key: "+mapSources.get(sourceNode)+" value: "+mapTargets.get(targetNode));
                 mapEdgeToWeight.put(new Pair(mapSources.get(sourceNode), mapTargets.get(targetNode)), weight);
-                //multisetTargets.add(t);
+
 
             } else {
                 map.put(mapNodes.get(sourceNode), mapNodes.get(targetNode));
@@ -155,8 +165,11 @@ public class Transformer {
 
             nodesIt = mapNodes.values().iterator();
         }
-            Short test = 0;
+
+        
         while (nodesIt.hasNext()) {
+            
+            
 
             Short currNode = nodesIt.next();
 //            System.out.println("number of targets associated with source "+currNode+": "+Transformer.map.get(currNode).size());
@@ -238,7 +251,7 @@ public class Transformer {
 //                System.out.println("current connected node in the loop: " + currTarget);
                 Float currWeight = currEntry.getKey();
 //                System.out.println("to which the current weight considered for inclusion is: "+currWeight);
-                if (Main.directedNetwork & countTargets >= Main.thresholdTargets) {
+                if (Main.directedNetwork & countTargets >= Main.maxNbTargetsPerSourceConsidered4CosineCalc) {
 //                    System.out.println("breaking on " + currWeight);
                     break;
                 }
@@ -248,6 +261,7 @@ public class Transformer {
 
                 int vectorPos = (int) currTarget;
 //                System.out.println("vectorPos: " + vectorPos);
+//                System.out.println("currWeight: " + currWeight);
 
                 vectorMJT.set(vectorPos, (double) currWeight);
 
@@ -261,20 +275,26 @@ public class Transformer {
         System.out.println("Number of targets (size of a vector): " + listVectors[0].size());
 
 
-//        for (int i = 0; i < listVectors[0].size(); i++) {
-//            //System.out.println("treating target "+i);
-//            for (int j = 0; j < listVectors.length; j++) {
-////                System.out.println("treating element "+j);
-//                if (multisetSources.contains((short) j)) {
-//                    System.out.print(listVectors[j].get(i) + "   ");
-//                }
-//            }
-//            System.out.println("");
-//        }
 
         mapEdgeToWeight.clear();
         matrixCreation.closeAndPrintClock();
 
+        InitialGraphCentrality IGC = new InitialGraphCentrality(mapUndirected);
+        DirectedGraph<Short, DefaultEdge> g = IGC.getGraph();
+        mapBetweenness = new HashMap();
+        
+//        System.out.println("size of mapNodes: "+mapNodes.size());
+ 
+        for (short vertex = 0;vertex<mapNodes.size();vertex++){
+        
+            if(Main.directedNetwork){
+//                System.out.println(mapNodes.inverse().get(vertex)+" "+g.inDegreeOf(vertex));    
+            mapBetweenness.put(vertex,g.inDegreeOf(vertex));
+            }
+            else{
+                        mapBetweenness.put(vertex,g.inDegreeOf(vertex)+g.outDegreeOf(vertex));
+            }
+        }
         return listVectors;
 
 

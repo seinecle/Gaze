@@ -81,7 +81,7 @@ public class Cosine2loops implements Runnable {
 
             numSources = listVectors.length;
 //            System.out.println("numSources: " + numSources);
-            numTargets = listVectors[0].size();
+            numTargets = Transformer.setTargetsShort.size();
             numCalculations = Math.pow(numSources, 2) / 2;
 //            System.out.println("numTargets: " + numTargets);
 //            batchMatrix = new SparseDoubleMatrix2D(numTargets, Main.batchSize);
@@ -138,7 +138,7 @@ public class Cosine2loops implements Runnable {
             matrixClock = new Clock("clocking the first " + Main.testruns + " calculus");
             
             for (int i = 0; i < numSources; i++) {
-                //System.out.println("matrix treatment... " + ((float) i / (float) numSources * 100) + "%");
+                if (Transformer.listVectors[i] == null) continue;
                 if (Main.useSparseVectors) {
                     //svSource = new SparseVector(new DenseVector(termDocumentMatrix.viewColumn(i).toArray()));
                     svSource = Transformer.listVectors[i];
@@ -158,6 +158,8 @@ public class Cosine2loops implements Runnable {
 
 
                 for (int j = 0; j < numSources; j++) {
+                    if (Transformer.listVectors[j] == null) continue;
+
                     if (j < i) {
 
                         int countBuffer = 0;
