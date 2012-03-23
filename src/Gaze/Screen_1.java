@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package cosine;
+package Gaze;
 
 import java.io.File;
 import java.io.IOException;
@@ -166,7 +166,7 @@ public class Screen_1 extends javax.swing.JFrame {
 
                 //System.out.println(String.valueOf(countHTML));
                 String[] args;
-                args = new String[5];
+                args = new String[9];
                 args[0] = workingDirectory;
                 args[1] = fileSelectedPathANdName;
                 args[2] = fileSelectedName;
@@ -175,16 +175,17 @@ public class Screen_1 extends javax.swing.JFrame {
                 System.out.println(args[3]);
                 try {
 //                args[4] = Screen2.maxWordsField.getText();          
-//                args[5] = Screen2.minCharsField.getText();
-//                args[6] = Screen2.nGramsField.getText();
-//                args[7] = Screen2.minOccurrences.getText();
+                args[5] = screen_2.cosineMin.getText();
+                args[6] = screen_2.maxTargets4Calc.getText();
+                args[7] = screen_2.minOccAsTarget.getText();
+                args[8] = screen_2.minOccAsSource.getText();
 //                args[8] = Screen2.fileSelectedPathANdName;
 //                args[9] = new Boolean(Screen2.deleteChars.isSelected()).toString();
                 //logArea.append(workingDirectory);
                 //                    args[1] = String.valueOf(countPDF);
             } catch (NullPointerException e){System.out.println("this value should not be null");}
       
-                Runnable r = new Main(args[0],args[2],args[3],args[4]);
+                Runnable r = new Main(args[0],args[2],args[3],args[4],args[5],args[6],args[7],args[8]);
                 new Thread(r).start();
 
 

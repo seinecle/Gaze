@@ -1,0 +1,5 @@
+source,target,Weight,type
+Vincent,Sixte,0.8918255796034608,undirected
+Vincent,Clement,0.12308354712764996,undirected
+Sixte,Clement,0.49346377060440877,undirected
+Sixte,Caroline,0.08908708195444003,undirected

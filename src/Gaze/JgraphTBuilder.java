@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package cosine;
+package Gaze;
 
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.TreeMultimap;
@@ -17,13 +17,13 @@ import org.jgrapht.graph.DefaultEdge;
  *
  * @author C. Levallois
  */
-public class InitialGraphCentrality {
+public class JgraphTBuilder {
 
     static DirectedGraph<Short, DefaultEdge> g =
             new DefaultDirectedGraph<Short, DefaultEdge>(DefaultEdge.class);
     HashSet<Short> vertices = new HashSet();
 
-    InitialGraphCentrality(TreeMultimap<Short, Short> mapUndirected) {
+    JgraphTBuilder(TreeMultimap<Short, Short> mapUndirected) {
 
 
 

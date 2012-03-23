@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package cosine;
+package Gaze;
 
 /* ==========================================
   CentralityComputer : a Java centrality measures library
@@ -24,7 +24,7 @@ package cosine;
 import java.util.*;
 import org.jgrapht.Graph;
   
-public class CEMEAS<V,E> {
+public class CentralityComputer<V,E> {
     
     private Graph<V,E> G;
     private HashMap<V,Integer> IndexMap;
@@ -41,7 +41,7 @@ public class CEMEAS<V,E> {
     /** 
     * Class constructor. Computes auxiliary data necessary to compute centrality characteristics.
     */
-    public CEMEAS(Graph<V,E> myGraph ){
+    public CentralityComputer(Graph<V,E> myGraph ){
     G=myGraph;
     n=G.vertexSet().size();
     IndexMap=new HashMap();

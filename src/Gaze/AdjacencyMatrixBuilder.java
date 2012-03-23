@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package cosine;
+package Gaze;
 
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultiset;
@@ -21,7 +21,7 @@ import org.jgrapht.graph.DefaultEdge;
  *
  * @author C. Levallois
  */
-public class Transformer {
+public class AdjacencyMatrixBuilder {
 
     private BufferedReader br;
     private final String str;
@@ -47,10 +47,9 @@ public class Transformer {
     public static SparseVector[] listVectors;
     private static Iterator<Short> nodesIt;
     private static SparseVector vectorMJT;
-    public static HashMap<Short,Integer> mapBetweenness;
-    
-    
-    Transformer(String str) {
+    public static HashMap<Short, Integer> mapBetweenness;
+
+    AdjacencyMatrixBuilder(String str) {
 
         this.str = str;
 
@@ -77,7 +76,12 @@ public class Transformer {
             String[] fields = currLine.split(str);
             sourceNode = fields[0];
             targetNode = fields[1];
-            weight = Float.valueOf(fields[2]);
+            if (Main.weightedNetwork) {
+                weight = Float.valueOf(fields[2]);
+            } else {
+                weight = (float) 0.5;
+            }
+
 
             boolean newNode1 = setNodes.add(sourceNode);
             boolean newNode2 = setNodes.add(targetNode);
@@ -107,7 +111,7 @@ public class Transformer {
                 if (newTarget) {
                     mapTargets.put(targetNode, t);
                     setTargetsShort.add(t);
-                    
+
                     t++;
                 }
                 multisetTargets.add(mapNodes.get(targetNode));
@@ -142,9 +146,9 @@ public class Transformer {
 
 
         readingFile.closeAndPrintClock();
-        
-        
-        
+
+
+
         Clock matrixCreation = new Clock("creating the adjacency matrix from the file");
         //this creates a list of vectors equal to the number of nodes, or just number of sources,
         //depending on whether the network is directed or not
@@ -166,13 +170,13 @@ public class Transformer {
             nodesIt = mapNodes.values().iterator();
         }
 
-        
+
         while (nodesIt.hasNext()) {
-            
-            
+
+
 
             Short currNode = nodesIt.next();
-//            System.out.println("number of targets associated with source "+currNode+": "+Transformer.map.get(currNode).size());
+//            System.out.println("number of targets associated with source "+currNode+": "+AdjacencyMatrixBuilder.map.get(currNode).size());
 
             SortedSet<Short> targets = new TreeSet();
 
@@ -194,7 +198,7 @@ public class Transformer {
             }
 
 
-            
+
             Iterator<Short> targetsIt = targets.iterator();
             TreeMap<Float, Short> setCurrWeights = new TreeMap();
             while (targetsIt.hasNext()) {
@@ -226,7 +230,7 @@ public class Transformer {
                     }
 //                    currWeight = mapEdgeToWeight.get(new Pair(currTarget, currNode));
 //                    System.out.println("currWeight: " + currWeight);
-                    setCurrWeights.put(currWeight,currTarget);
+                    setCurrWeights.put(currWeight, currTarget);
                 }
             }
 
@@ -246,7 +250,7 @@ public class Transformer {
 
             //this is where the threshold of how many targets are considered for the calculus of the cosine.
             while (ITsetCurrWeights.hasNext()) {
-                Entry <Float, Short> currEntry = ITsetCurrWeights.next();
+                Entry<Float, Short> currEntry = ITsetCurrWeights.next();
                 Short currTarget = currEntry.getValue();
 //                System.out.println("current connected node in the loop: " + currTarget);
                 Float currWeight = currEntry.getKey();
@@ -262,8 +266,11 @@ public class Transformer {
                 int vectorPos = (int) currTarget;
 //                System.out.println("vectorPos: " + vectorPos);
 //                System.out.println("currWeight: " + currWeight);
-
-                vectorMJT.set(vectorPos, (double) currWeight);
+                if (Main.weightedNetwork) {
+                    vectorMJT.set(vectorPos, (double) currWeight);
+                } else {
+                    vectorMJT.set(vectorPos, 1.00);
+                }
 
             }
 //            System.out.println("count targets: " + countTargets);
@@ -279,22 +286,25 @@ public class Transformer {
         mapEdgeToWeight.clear();
         matrixCreation.closeAndPrintClock();
 
-        InitialGraphCentrality IGC = new InitialGraphCentrality(mapUndirected);
-        DirectedGraph<Short, DefaultEdge> g = IGC.getGraph();
+        Clock computingbetweennessClock = new Clock("computing betweenneess scores in the initial network");
+        JgraphTBuilder graphBuilder = new JgraphTBuilder(mapUndirected);
+        DirectedGraph<Short, DefaultEdge> g = graphBuilder.getGraph();
         mapBetweenness = new HashMap();
-        
+
 //        System.out.println("size of mapNodes: "+mapNodes.size());
- 
-        for (short vertex = 0;vertex<mapNodes.size();vertex++){
-        
-            if(Main.directedNetwork){
+
+
+        for (short vertex = 0; vertex < mapNodes.size(); vertex++) {
+
+            if (Main.directedNetwork) {
 //                System.out.println(mapNodes.inverse().get(vertex)+" "+g.inDegreeOf(vertex));    
-            mapBetweenness.put(vertex,g.inDegreeOf(vertex));
-            }
-            else{
-                        mapBetweenness.put(vertex,g.inDegreeOf(vertex)+g.outDegreeOf(vertex));
+                mapBetweenness.put(vertex, g.inDegreeOf(vertex));
+            } else {
+                mapBetweenness.put(vertex, g.inDegreeOf(vertex) + g.outDegreeOf(vertex));
             }
         }
+        computingbetweennessClock.closeAndPrintClock();
+
         return listVectors;
 
 
