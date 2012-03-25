@@ -173,17 +173,17 @@ public class AdjacencyMatrixBuilder {
 
 
             Short currNode = nodesIt.next();
-            System.out.println("number of targets associated with source "+currNode+": "+AdjacencyMatrixBuilder.map.get(currNode).size());
+//            System.out.println("number of targets associated with source "+currNode+": "+AdjacencyMatrixBuilder.map.get(currNode).size());
 
             SortedSet<Short> targets = new TreeSet();
 
 
 
             if (Main.directedNetwork) {
-                System.out.println("currNode: " + mapSources.inverse().get(currNode)+" (index ="+currNode+")");
+//                System.out.println("currNode: " + mapSources.inverse().get(currNode)+" (index ="+currNode+")");
                 targets = map.get(currNode);
-                System.out.println("Size of the set of connected nodes for node " + mapSources.inverse().get(currNode) + ": " + targets.size());
-                System.out.println("list of connected nodes:" +targets);
+//                System.out.println("Size of the set of connected nodes for node " + mapSources.inverse().get(currNode) + ": " + targets.size());
+//                System.out.println("list of connected nodes:" +targets);
 
             } else {
 //                System.out.println(mapNodes.inverse().get(currNode));
@@ -201,7 +201,7 @@ public class AdjacencyMatrixBuilder {
             while (targetsIt.hasNext()) {
 
                 Short currTarget = targetsIt.next();
-                System.out.println("current connected Node: " + currTarget);
+//                System.out.println("current connected Node: " + currTarget);
 
                 Float currWeight = mapEdgeToWeight.get(new Pair(currNode, currTarget));
                 if (currWeight == null) {
@@ -209,7 +209,7 @@ public class AdjacencyMatrixBuilder {
                     continue;
                 }
 
-                System.out.println("currWeight: " + currWeight);
+//                System.out.println("currWeight: " + currWeight);
                 setCurrWeights.put(currWeight, currTarget);
             }
 

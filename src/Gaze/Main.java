@@ -92,6 +92,10 @@ public class Main implements Runnable{
     @Override
     public void run()  {
         try {
+            
+            //this line is for the users who did not change the default value of zero to 1 when the network is directed
+            if(directedNetwork & minNbofCitationsASourceShouldMake == 0) minNbofCitationsASourceShouldMake = 1;
+            
             AdjacencyMatrixBuilder tr = new AdjacencyMatrixBuilder(fieldSeparator);
             SparseVector[] listVectors = tr.EdgeListToMatrix();
 
@@ -178,28 +182,28 @@ public class Main implements Runnable{
 
                 MatrixEntry currElement = itSM.next();
                 double csCoeff = currElement.get();
-
+                if (currElement.column()==currElement.row()) continue;
                 if (directedNetwork) {
-                    System.out.println("before the condition");
-                    System.out.println("currElement.column(): "+inverseMapSources.get((short) currElement.column())+ "  "+currElement.column());
-                    System.out.println("currElement.row(): "+inverseMapSources.get((short) currElement.row())+ "  "+currElement.row());
+//                    System.out.println("before the condition");
+//                    System.out.println("currElement.column(): "+inverseMapSources.get((short) currElement.column())+ "  "+currElement.column());
+//                    System.out.println("currElement.row(): "+inverseMapSources.get((short) currElement.row())+ "  "+currElement.row());
 
                     int nbOccAsSourceColumn = AdjacencyMatrixBuilder.map.get((short) currElement.column()).size();
                     int nbOccAsSourceRow = AdjacencyMatrixBuilder.map.get((short) currElement.row()).size();
                     int nbOccAsTargetColumn = AdjacencyMatrixBuilder.multisetTargets.count(AdjacencyMatrixBuilder.mapTargets.get((inverseMapSources.get((short)currElement.column()))));
                     int nbOccAsTargetRow = AdjacencyMatrixBuilder.multisetTargets.count(AdjacencyMatrixBuilder.mapTargets.get((inverseMapSources.get((short)currElement.row()))));
-                    System.out.println("occurrences as source (col): "+nbOccAsSourceColumn);
-                    System.out.println("occurrences as source (row): "+nbOccAsSourceRow);                
-                    System.out.println("occurrences as target (col): "+nbOccAsTargetColumn);
-                    System.out.println("occurrences as target (row): "+nbOccAsTargetRow);                
-                    System.out.println("cosine for this pair is: "+csCoeff);
+//                    System.out.println("occurrences as source (col): "+nbOccAsSourceColumn);
+//                    System.out.println("occurrences as source (row): "+nbOccAsSourceRow);                
+//                    System.out.println("occurrences as target (col): "+nbOccAsTargetColumn);
+//                    System.out.println("occurrences as target (row): "+nbOccAsTargetRow);                
+//                    System.out.println("cosine for this pair is: "+csCoeff);
                     
                     if ((csCoeff > cosineThreshold)
                             & (nbOccAsSourceColumn >= minNbofCitationsASourceShouldMake) & (nbOccAsSourceRow >= minNbofCitationsASourceShouldMake)
                             & (nbOccAsTargetColumn >= minNbofTimesASourceShouldBeCited) & (nbOccAsTargetRow >= minNbofTimesASourceShouldBeCited)
                             ) {
 
-                        System.out.println("past the condition");
+//                        System.out.println("past the condition");
                         toBeWritten.append(inverseMapSources.get((short) currElement.column())).append(",").append(inverseMapSources.get((short) currElement.row())).append(",").append(csCoeff).append(",").append("undirected").append("\n");
 
                     }
