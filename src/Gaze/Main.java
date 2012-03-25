@@ -112,7 +112,7 @@ public class Main implements Runnable{
     //        This invert operation symply inversts keys and values in the map for ease of retrieval - nothing more!
 
 
-            BiMap inverseMapNodes = AdjacencyMatrixBuilder.mapNodes.inverse();
+            BiMap<Short,String> inverseMapSources = AdjacencyMatrixBuilder.mapSources.inverse();
             StringBuilder toBeWritten = new StringBuilder();
             Iterator<MatrixEntry> itSM = similarityMatrix.iterator();
             
@@ -180,27 +180,27 @@ public class Main implements Runnable{
                 double csCoeff = currElement.get();
 
                 if (directedNetwork) {
-//                    System.out.println("before the condition");
-//                    System.out.println("currElement.column(): "+inverseMapNodes.get((short) currElement.column())+ "  "+currElement.column());
-//                    System.out.println("currElement.row(): "+inverseMapNodes.get((short) currElement.row())+ "  "+currElement.row());
+                    System.out.println("before the condition");
+                    System.out.println("currElement.column(): "+inverseMapSources.get((short) currElement.column())+ "  "+currElement.column());
+                    System.out.println("currElement.row(): "+inverseMapSources.get((short) currElement.row())+ "  "+currElement.row());
 
-                    int nbOccAsSourceColumn = AdjacencyMatrixBuilder.mapUndirected.get((short) currElement.column()).size();
-                    int nbOccAsSourceRow = AdjacencyMatrixBuilder.mapUndirected.get((short) currElement.row()).size();
-                    int nbOccAsTargetColumn = AdjacencyMatrixBuilder.multisetTargets.count((short)currElement.column());
-                    int nbOccAsTargetRow = AdjacencyMatrixBuilder.multisetTargets.count((short)currElement.row());
-//                    System.out.println("occurrences as source (col): "+nbOccAsSourceColumn);
-//                    System.out.println("occurrences as source (row): "+nbOccAsSourceRow);                
-//                    System.out.println("occurrences as target (col): "+nbOccAsTargetColumn);
-//                    System.out.println("occurrences as target (row): "+nbOccAsTargetRow);                
-//                    System.out.println("cosine for this pair is: "+csCoeff);
+                    int nbOccAsSourceColumn = AdjacencyMatrixBuilder.map.get((short) currElement.column()).size();
+                    int nbOccAsSourceRow = AdjacencyMatrixBuilder.map.get((short) currElement.row()).size();
+                    int nbOccAsTargetColumn = AdjacencyMatrixBuilder.multisetTargets.count(AdjacencyMatrixBuilder.mapTargets.get((inverseMapSources.get((short)currElement.column()))));
+                    int nbOccAsTargetRow = AdjacencyMatrixBuilder.multisetTargets.count(AdjacencyMatrixBuilder.mapTargets.get((inverseMapSources.get((short)currElement.row()))));
+                    System.out.println("occurrences as source (col): "+nbOccAsSourceColumn);
+                    System.out.println("occurrences as source (row): "+nbOccAsSourceRow);                
+                    System.out.println("occurrences as target (col): "+nbOccAsTargetColumn);
+                    System.out.println("occurrences as target (row): "+nbOccAsTargetRow);                
+                    System.out.println("cosine for this pair is: "+csCoeff);
                     
                     if ((csCoeff > cosineThreshold)
-                            & (nbOccAsSourceColumn > minNbofCitationsASourceShouldMake) & (nbOccAsSourceRow > minNbofCitationsASourceShouldMake)
-                            & (nbOccAsTargetColumn > minNbofTimesASourceShouldBeCited) & (nbOccAsTargetRow > minNbofTimesASourceShouldBeCited)
+                            & (nbOccAsSourceColumn >= minNbofCitationsASourceShouldMake) & (nbOccAsSourceRow >= minNbofCitationsASourceShouldMake)
+                            & (nbOccAsTargetColumn >= minNbofTimesASourceShouldBeCited) & (nbOccAsTargetRow >= minNbofTimesASourceShouldBeCited)
                             ) {
 
-//                        System.out.println("past the condition");
-                        toBeWritten.append(inverseMapNodes.get((short) currElement.column())).append(",").append(inverseMapNodes.get((short) currElement.row())).append(",").append(csCoeff).append(",").append("undirected").append("\n");
+                        System.out.println("past the condition");
+                        toBeWritten.append(inverseMapSources.get((short) currElement.column())).append(",").append(inverseMapSources.get((short) currElement.row())).append(",").append(csCoeff).append(",").append("undirected").append("\n");
 
                     }
 
@@ -209,7 +209,7 @@ public class Main implements Runnable{
 
                     if (csCoeff > cosineThreshold) {
 
-                       toBeWritten.append(inverseMapNodes.get((short) currElement.column())).append(",").append(inverseMapNodes.get((short) currElement.row())).append(",").append(csCoeff).append(",").append("undirected").append("\n");                    }
+                       toBeWritten.append(inverseMapSources.get((short) currElement.column())).append(",").append(inverseMapSources.get((short) currElement.row())).append(",").append(csCoeff).append(",").append("undirected").append("\n");                    }
                 }
             }
 
@@ -231,7 +231,7 @@ public class Main implements Runnable{
 //                System.out.println("currEntry count: "+AdjacencyMatrixBuilder.mapUndirected.keys().count(currEntry.getValue()));
 //                System.out.println("currEntry times referenced: "+Collections.frequency(AdjacencyMatrixBuilder.mapUndirected.values(),currEntry.getValue()));
                 
-                if(AdjacencyMatrixBuilder.multisetTargets.count(currEntry.getValue())<=minNbofTimesASourceShouldBeCited | AdjacencyMatrixBuilder.mapUndirected.keys().count(currEntry.getValue())<= minNbofCitationsASourceShouldMake)
+                if(AdjacencyMatrixBuilder.multisetTargets.count(currEntry.getValue())<minNbofTimesASourceShouldBeCited | AdjacencyMatrixBuilder.map.keys().count(currEntry.getValue())< minNbofCitationsASourceShouldMake)
                         continue;
                 int currCentrality = AdjacencyMatrixBuilder.mapBetweenness.get(currEntry.getValue());
                 toBeWritten.append(currEntry.getKey()).append(",").append(currCentrality).append("\n");
@@ -240,6 +240,7 @@ public class Main implements Runnable{
             bw.write(toBeWritten.toString());
             bw.close();
             printNodesListCSV.closeAndPrintClock();
+            Screen_1.screen_1.result.setVisible(true);
             
         } catch (InterruptedException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);

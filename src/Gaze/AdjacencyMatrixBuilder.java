@@ -30,9 +30,7 @@ public class AdjacencyMatrixBuilder {
     private HashSet<String> setSources = new HashSet();
     private HashSet<String> setTargets = new HashSet();
     private TreeSet<Short> setSourcesShort = new TreeSet();
-    public static TreeSet<Short> setTargetsShort = new TreeSet();
     public static HashMultiset<Short> multisetTargets = HashMultiset.create();
-    public static HashMultiset<Short> multisetSources = HashMultiset.create();
     public static HashBiMap<String, Short> mapNodes = HashBiMap.create();
     public static HashBiMap<String, Short> mapSources = HashBiMap.create();
     public static HashBiMap<String, Short> mapTargets = HashBiMap.create();
@@ -110,11 +108,10 @@ public class AdjacencyMatrixBuilder {
                 }
                 if (newTarget) {
                     mapTargets.put(targetNode, t);
-                    setTargetsShort.add(t);
-
                     t++;
                 }
-                multisetTargets.add(mapNodes.get(targetNode));
+                multisetTargets.add(mapTargets.get(targetNode));
+
 
             }
 
@@ -153,7 +150,7 @@ public class AdjacencyMatrixBuilder {
         //this creates a list of vectors equal to the number of nodes, or just number of sources,
         //depending on whether the network is directed or not
         if (Main.directedNetwork) {
-            listVectors = new SparseVector[setSourcesShort.size()];
+            listVectors = new SparseVector[mapSources.size()];
         } else {
             listVectors = new SparseVector[setNodes.size()];
         }
@@ -176,17 +173,17 @@ public class AdjacencyMatrixBuilder {
 
 
             Short currNode = nodesIt.next();
-//            System.out.println("number of targets associated with source "+currNode+": "+AdjacencyMatrixBuilder.map.get(currNode).size());
+            System.out.println("number of targets associated with source "+currNode+": "+AdjacencyMatrixBuilder.map.get(currNode).size());
 
             SortedSet<Short> targets = new TreeSet();
 
 
 
             if (Main.directedNetwork) {
-//                System.out.println("currNode: " + mapSources.inverse().get(currNode)+" (index ="+currNode+")");
+                System.out.println("currNode: " + mapSources.inverse().get(currNode)+" (index ="+currNode+")");
                 targets = map.get(currNode);
-//                System.out.println("Size of the set of connected nodes for node " + mapSources.inverse().get(currNode) + ": " + targets.size());
-//                System.out.println("list of connected nodes:" +targets);
+                System.out.println("Size of the set of connected nodes for node " + mapSources.inverse().get(currNode) + ": " + targets.size());
+                System.out.println("list of connected nodes:" +targets);
 
             } else {
 //                System.out.println(mapNodes.inverse().get(currNode));
@@ -204,15 +201,15 @@ public class AdjacencyMatrixBuilder {
             while (targetsIt.hasNext()) {
 
                 Short currTarget = targetsIt.next();
-//                System.out.println("current connected Node: " + currTarget);
+                System.out.println("current connected Node: " + currTarget);
 
                 Float currWeight = mapEdgeToWeight.get(new Pair(currNode, currTarget));
                 if (currWeight == null) {
 
                     continue;
                 }
-//                    currWeight = mapEdgeToWeight.get(new Pair(currTarget, currNode));
-//                System.out.println("currWeight: " + currWeight);
+
+                System.out.println("currWeight: " + currWeight);
                 setCurrWeights.put(currWeight, currTarget);
             }
 
@@ -242,7 +239,7 @@ public class AdjacencyMatrixBuilder {
 //            System.out.println("nb of targets: " + targets.size());
 
             if (Main.directedNetwork) {
-                vectorMJT = new SparseVector(setTargetsShort.size());
+                vectorMJT = new SparseVector(multisetTargets.elementSet().size());
 
             } else {
                 vectorMJT = new SparseVector(mapNodes.size());

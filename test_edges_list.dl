@@ -1,0 +1,11 @@
+source,target,Weight,type
+A,B,1.0,undirected
+A,C,1.0,undirected
+A,D,1.0,undirected
+A,E,1.0,undirected
+B,C,1.0,undirected
+B,D,1.0,undirected
+B,E,1.0,undirected
+C,D,1.0,undirected
+C,E,1.0,undirected
+D,E,1.0,undirected

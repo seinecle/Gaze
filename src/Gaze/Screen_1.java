@@ -21,6 +21,7 @@ public class Screen_1 extends javax.swing.JFrame {
     private String fileSelectedName;
     public static Screen_1 screen_1;
     public static Screen_2 screen_2;
+    public static Screen_3 screen_3;
     File f;
     /**
      * Creates new form Screen_1
@@ -46,6 +47,8 @@ public class Screen_1 extends javax.swing.JFrame {
         selectFileButton = new javax.swing.JButton();
         findStructureButton = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
+        result = new javax.swing.JLabel();
+        creditsButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -78,28 +81,40 @@ public class Screen_1 extends javax.swing.JFrame {
             }
         });
 
+        result.setText("<html><b>Done!</b><br><br>2 files have been created:<br>- a list of nodes<br>- a list of edges<br><br>These files are in the same folder as your original file.<br>You can import these files into Gephi or any other network viz software to explore the structure of your network.</html>");
+
+        creditsButton.setText("credits");
+        creditsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                creditsButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton3)
-                .addGap(42, 42, 42))
             .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(creditsButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton3)
+                        .addGap(42, 42, 42))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel1))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(selectFileButton)
-                        .addGap(64, 64, 64)
-                        .addComponent(findStructureButton)))
-                .addContainerGap(71, Short.MAX_VALUE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(selectFileButton)
+                                .addGap(64, 64, 64)
+                                .addComponent(findStructureButton)))
+                        .addContainerGap(72, Short.MAX_VALUE))))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(23, 23, 23)
+                .addComponent(result, javax.swing.GroupLayout.PREFERRED_SIZE, 199, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -112,8 +127,12 @@ public class Screen_1 extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(selectFileButton)
                     .addComponent(findStructureButton))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 290, Short.MAX_VALUE)
-                .addComponent(jButton3)
+                .addGap(36, 36, 36)
+                .addComponent(result, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 55, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton3)
+                    .addComponent(creditsButton))
                 .addGap(26, 26, 26))
         );
 
@@ -199,6 +218,11 @@ public class Screen_1 extends javax.swing.JFrame {
         screen_1.setVisible(false);
     }//GEN-LAST:event_jButton3ActionPerformed
 
+    private void creditsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_creditsButtonActionPerformed
+        screen_3.setVisible(true);
+        screen_1.setVisible(false);
+    }//GEN-LAST:event_creditsButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -239,9 +263,12 @@ public class Screen_1 extends javax.swing.JFrame {
             public void run() {
                 try {
                     screen_1 = new Screen_1();
+                    screen_1.result.setVisible(false);
                     screen_1.setVisible(true);
                     screen_2 = new Screen_2();
                     screen_2.setVisible(false);
+                    screen_3 = new Screen_3();
+                    screen_3.setVisible(false);
                 } catch (IOException ex) {
                     Logger.getLogger(Screen_1.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -249,11 +276,13 @@ public class Screen_1 extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton creditsButton;
     private javax.swing.JButton findStructureButton;
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
+    public javax.swing.JLabel result;
     private javax.swing.JButton selectFileButton;
     // End of variables declaration//GEN-END:variables
 }

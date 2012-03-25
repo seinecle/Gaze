@@ -3,8 +3,9 @@ Clement,Caroline,0.1
 Clement,Sixte,1.00
 Caroline,Sixte,0.6
 Clement,Vincent,0.5
-Sixte,Caroline,0.1
 Caroline,Vincent,0.7
+Sixte,Caroline,0.1
+Sixte,Clement,0.5
 Caroline,Sixte,0.1
-Vincent,Caroline,0.01
 Caroline,Clement,0.4
+Vincent,Caroline,0.5

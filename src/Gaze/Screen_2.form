@@ -54,26 +54,26 @@
                       </Group>
                       <Group type="102" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="minOccAsSource" min="-2" max="-2" attributes="0"/>
                               <Component id="jTextField3" min="-2" max="-2" attributes="0"/>
                               <Group type="102" attributes="0">
                                   <Component id="directedNetwork" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace min="-2" pref="35" max="-2" attributes="0"/>
                                   <Component id="weightNetwork" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <Component id="cosineMin" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="jLabel1" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="maxTargets4Calc" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="minOccAsTarget" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="jLabel3" alignment="0" min="-2" pref="483" max="-2" attributes="0"/>
                               <Group type="102" alignment="0" attributes="0">
                                   <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace min="-2" pref="224" max="-2" attributes="0"/>
                                   <Component id="jButton1" min="-2" max="-2" attributes="0"/>
                               </Group>
+                              <Component id="minOccAsTarget" alignment="0" min="-2" pref="51" max="-2" attributes="0"/>
+                              <Component id="maxTargets4Calc" alignment="0" min="-2" pref="50" max="-2" attributes="0"/>
+                              <Component id="cosineMin" alignment="0" min="-2" pref="46" max="-2" attributes="0"/>
+                              <Component id="minOccAsSource" alignment="0" min="-2" pref="49" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace max="32767" attributes="0"/>
+                          <EmptySpace pref="37" max="32767" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
@@ -143,7 +143,7 @@
         </Component>
         <Component class="javax.swing.JTextField" name="cosineMin">
           <Properties>
-            <Property name="text" type="java.lang.String" value="0.05"/>
+            <Property name="text" type="java.lang.String" value="0.01"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cosineMinActionPerformed"/>
@@ -176,6 +176,9 @@
         <Component class="javax.swing.JTextField" name="minOccAsTarget">
           <Properties>
             <Property name="text" type="java.lang.String" value="0"/>
+            <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[15, 22]"/>
+            </Property>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="minOccAsTargetActionPerformed"/>

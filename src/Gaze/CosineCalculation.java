@@ -61,7 +61,7 @@ public class CosineCalculation implements Runnable {
 
         Main.similarityMatrix = new FlexCompColMatrix(numSources, numSources);
 
-        System.out.println("size of the similiarity matrix: " + numSources + "x " + numSources);
+        System.out.println("size of the similiarity matrix: " + numSources + " x " + numSources);
 
         //1. iteration through all rows (targets) of the termDocumentMatrix
 
