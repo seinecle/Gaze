@@ -22,7 +22,7 @@ public class CosineCalculation implements Runnable {
     public static Clock matrixClock;
     static public ArrayList<Integer> nonZeroIndexListSource = new ArrayList();
     static public ArrayList<Integer> nonZeroIndexListTarget = new ArrayList();
-    static public int numSources;
+    static public int numNodes;
     static double normSource;
     static public ArrayList<Double> norms;
     static public int sizeVector;
@@ -43,40 +43,50 @@ public class CosineCalculation implements Runnable {
     @Override
     public void run() {
 
+        //to clarify: sources and targets refer to the 2 elements of a pair of nodes, that's all
+        //without a reference to which node was actually a source in the initial edge list, and which was a target
         SparseVector svSource = new SparseVector(1);
         SparseVector svTarget = new SparseVector(1);
 
 
         Clock computeSimilarityClock = new Clock("computing similarity with\nsparseVectors: " + Main.useSparseVectors);
+        
+        //the number of nodes which will appear in the final similarity network
+        //corresponds to the number of vectors contained in the list created in AdjacencyMtrixBuilder
+        numNodes = listVectors.length;
+//      numTargets = AdjacencyMatrixBuilder.setTargetsShort.size();
+        
+        
+        //this looks complicated but is simply the number of elements in the networks and all their combinations
+        numCalculations = Math.pow(numNodes, 2) / 2;
 
-        numSources = listVectors.length;
-//            numTargets = AdjacencyMatrixBuilder.setTargetsShort.size();
-        numCalculations = Math.pow(numSources, 2) / 2;
 
 
 
 
 
+        //this is where the adjacency matrix for the final network is built
+        Main.similarityMatrix = new FlexCompColMatrix(numNodes, numNodes);
 
+        System.out.println("size of the similiarity matrix: " + numNodes + " x " + numNodes);
 
-        Main.similarityMatrix = new FlexCompColMatrix(numSources, numSources);
-
-        System.out.println("size of the similiarity matrix: " + numSources + " x " + numSources);
-
-        //1. iteration through all rows (targets) of the termDocumentMatrix
+        //1. iteration through all nodes of the similarityMatrix
 
         norms = new ArrayList();
 
         matrixClock = new Clock("clocking the first " + Main.testruns + " calculus");
 
-        for (int i = 0; i < numSources; i++) {
+        for (int i = 0; i < numNodes; i++) {
+            
+            //in the case of undirected networks, the vector can be empty
+            //because there...???
             if (AdjacencyMatrixBuilder.listVectors[i] == null) {
                 continue;
             }
             svSource = AdjacencyMatrixBuilder.listVectors[i];
             norms.add(svSource.norm(Vector.Norm.Two));
 
-            for (int j = 0; j < numSources; j++) {
+            for (int j = 0; j < numNodes; j++) {
                 if (AdjacencyMatrixBuilder.listVectors[j] == null) {
                     continue;
                 }
@@ -139,9 +149,8 @@ public class CosineCalculation implements Runnable {
                     }
 
                 } else {
-                    synchronized (Main.similarityMatrix) {
+
                         Main.similarityMatrix.set(i, j, 0);
-                    }
 
                 }
 
@@ -285,9 +294,7 @@ public class CosineCalculation implements Runnable {
         double result = source.dot(target) / (CosineCalculation.norms.get(i) * CosineCalculation.norms.get(j));
         //System.out.println("result in the runnable: " + result);
 //    Triple similarityResult = new Triple(i,j,result);
-        synchronized (Main.similarityMatrix) {
             Main.similarityMatrix.set(i, j, result);
-        }
 //    long endTime = System.currentTimeMillis();
 //    CosineCalculation.cellTime = CosineCalculation.cellTime + endTime-currentTime; 
     }

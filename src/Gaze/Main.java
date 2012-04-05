@@ -58,7 +58,6 @@ public class Main implements Runnable{
     static String file;
     private  String DLoutputFile;
     private  String DLNodesList;
-    private String GEXFoutputFile;
     static private String fieldSeparator = ",";
     //
     // ##### parameters
@@ -99,8 +98,6 @@ public class Main implements Runnable{
             AdjacencyMatrixBuilder tr = new AdjacencyMatrixBuilder(fieldSeparator);
             SparseVector[] listVectors = tr.EdgeListToMatrix();
 
-    //        CosineSimilarity cs = new CosineSimilarity();
-    //        cs.transform(matrixSource);
 
             Thread t = new Thread(new CosineCalculation(listVectors));
             t.start();
@@ -109,7 +106,7 @@ public class Main implements Runnable{
 
             DLoutputFile = file.replaceAll("\\..*", "") + "_edges_list.dl";
             DLNodesList = file.replaceAll("\\..*", "") + "_nodes_list.dl";
-            GEXFoutputFile = file.replaceAll("\\....", "") + "_cosine_version.gexf";
+//            GEXFoutputFile = file.replaceAll("\\....", "") + "_cosine_version.gexf";
 
 
 

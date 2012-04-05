@@ -55,25 +55,37 @@ public class AdjacencyMatrixBuilder {
 
     SparseVector[] EdgeListToMatrix() throws IOException {
 
-        // i - Row index: Targets
-        // j - Column index: Sources
 
 
 
         short n = 0;
         short s = 0;
         short t = 0;
+
+        //***
+        //
+        //#### 1. reading the edges list and creating indexes and maps from it
+        //
+        //***
+
+
         Clock readingFile = new Clock("reading input file");
         br = new BufferedReader(new FileReader(Main.wk + Main.file));
+
         currLine = br.readLine();
         while (currLine != null) {
             countLines++;
+
+            //for debugging purposes: the buffered reader will stop reading when it meets a line with "stop" in the edges list file
             if ("stop".equals(currLine)) {
                 break;
             }
+
             String[] fields = currLine.split(str);
             sourceNode = fields[0];
             targetNode = fields[1];
+
+            //assigns an arbitrary value of 0.5 to each edge if the network is unwieghted
             if (Main.weightedNetwork) {
                 weight = Float.valueOf(fields[2]);
             } else {
@@ -81,6 +93,8 @@ public class AdjacencyMatrixBuilder {
             }
 
 
+            //this step detects nodes which have not been indexed yet, and give them one
+            //without making a distinction between sources and tagets
             boolean newNode1 = setNodes.add(sourceNode);
             boolean newNode2 = setNodes.add(targetNode);
 
@@ -96,6 +110,7 @@ public class AdjacencyMatrixBuilder {
             }
 
 
+            //this step is to attribute distinct indexes to sources and targets in a directed network
             if (Main.directedNetwork) {
                 boolean newSource = setSources.add(sourceNode);
                 boolean newTarget = setTargets.add(targetNode);
@@ -110,16 +125,23 @@ public class AdjacencyMatrixBuilder {
                     mapTargets.put(targetNode, t);
                     t++;
                 }
+                //this last line is for the specific purpose of being able to easily count the number of times a node appears as a target in the network
+                //this is a bit redundant since this info is already contained in the "map" multimap created just below,
+                //but the multimap makes it hard to retrieve a multiset of a specific value. Hence.
                 multisetTargets.add(mapTargets.get(targetNode));
 
 
             }
 
-//            if (weight < 0.0001) {
-//                weight = 0.00;
-//            }
+//for huge networks, these lines could be useful because they make the matrix much more sparse, at a negligible cost of precision            
+            if (weight < 0.0001) {
+                weight = (float)0;
+            }
 
 
+            //creation of different maps for latter reference
+            // note that for a directed network, we need both a map with nodes referenced by their indexes as sources and targets,
+            // and a map where they are referenced just as general nodes
             if (Main.directedNetwork) {
                 map.put(mapSources.get(sourceNode), mapTargets.get(targetNode));
                 mapUndirected.put(mapNodes.get(sourceNode), mapNodes.get(targetNode));
@@ -145,17 +167,26 @@ public class AdjacencyMatrixBuilder {
         readingFile.closeAndPrintClock();
 
 
+        //***
+        //
+        //#### 2. reading the edges list and creating indexes and maps from it
+        //
+        //***
 
         Clock matrixCreation = new Clock("creating the adjacency matrix from the file");
         //this creates a list of vectors equal to the number of nodes, or just number of sources,
         //depending on whether the network is directed or not
+        // a vector is a list of elements which are going to be the stuff of the similarity calculation.
         if (Main.directedNetwork) {
             listVectors = new SparseVector[mapSources.size()];
         } else {
             listVectors = new SparseVector[setNodes.size()];
         }
+
+        //not sure these 2 lines make a lot of difference? They are intented do save memory.
         setNodes.clear();
         setTargets.clear();
+
 
         //this loops through all nodes, or just the sources, to create the similarity matrix
         //depending on whether the network is directed or not
@@ -175,10 +206,14 @@ public class AdjacencyMatrixBuilder {
             Short currNode = nodesIt.next();
 //            System.out.println("number of targets associated with source "+currNode+": "+AdjacencyMatrixBuilder.map.get(currNode).size());
 
+
             SortedSet<Short> targets = new TreeSet();
 
 
-
+            //with this step, one gets all the target nodes corresponding to the current source node (directed network)
+            // but if the network is undirected, that's a bit more tricky:
+            //one needs to get all the sources corresponding to the current node as a target, + all the targets corresponding to this node as a source.
+            // so the name "targets" for the sorted set is misleading, since in the case of undirected networks in includes sources too. Oh, well.
             if (Main.directedNetwork) {
 //                System.out.println("currNode: " + mapSources.inverse().get(currNode)+" (index ="+currNode+")");
                 targets = map.get(currNode);
@@ -195,6 +230,11 @@ public class AdjacencyMatrixBuilder {
             }
 
 
+            //Now, we iterate through this set of "targets" to retrieve the weights of all (currNode, currTargets).
+            // this step should be skipped in the case of unweighted networks, no?
+            // also, not the 2 sub steps:
+            // - the first one is for all networks
+            // the second one is for undirected networks only
 
             Iterator<Short> targetsIt = targets.iterator();
             TreeMap<Float, Short> setCurrWeights = new TreeMap();
@@ -203,7 +243,9 @@ public class AdjacencyMatrixBuilder {
                 Short currTarget = targetsIt.next();
 //                System.out.println("current connected Node: " + currTarget);
 
+
                 Float currWeight = mapEdgeToWeight.get(new Pair(currNode, currTarget));
+
                 if (currWeight == null) {
 
                     continue;
@@ -232,6 +274,17 @@ public class AdjacencyMatrixBuilder {
             }
 
 
+            //now, we iterate through the set of "targets" and their corresponding weight for the curr node.
+            //we take an ordered map, descending, because we want to afford the possibility to limit the number of "targets"
+            //to a number specified by the user (for performance purposes). If the number of targets is limited, then we want to keep
+            //those which have the highest weights. That's what this does.
+
+            //the values retained by this iteration will be written in the vector corresponding to the node we are current looping on
+            //at which position? At the position corresponding to their index as "target".
+            // let's be clear: a "target" is a target in directed networks,
+            // but a "target" can be any node in an undirected network
+            // you can see that in the definition of the size of the vector just below
+
             int countTargets = 0;
             NavigableMap descMap = setCurrWeights.descendingMap();
             Iterator<Entry<Float, Short>> ITsetCurrWeights = descMap.entrySet().iterator();
@@ -252,7 +305,7 @@ public class AdjacencyMatrixBuilder {
 //                System.out.println("current connected node in the loop: " + currTarget);
                 Float currWeight = currEntry.getKey();
 //                System.out.println("to which the current weight considered for inclusion is: "+currWeight);
-                if (Main.directedNetwork & countTargets >= Main.maxNbTargetsPerSourceConsidered4CosineCalc) {
+                if (countTargets >= Main.maxNbTargetsPerSourceConsidered4CosineCalc) {
 //                    System.out.println("breaking on " + currWeight);
                     break;
                 }
@@ -270,6 +323,10 @@ public class AdjacencyMatrixBuilder {
                 }
 
             }
+
+            //finally, the treatment fot the current node is over and we can put the the vector of its targets/ weights in a list of vectors,
+            //over which the cosine calculation will take place (see the CosineCalculation class)
+
 //            System.out.println("count targets: " + countTargets);
             listVectors[currNode] = vectorMJT;
             //System.out.println(vectorMJT.getIndex().length);
@@ -283,12 +340,25 @@ public class AdjacencyMatrixBuilder {
         mapEdgeToWeight.clear();
         matrixCreation.closeAndPrintClock();
 
+
+
+        //oh, and before leaving there is the betweeness calculation
+        //it has to be done on the original network (the one of the user), not on the final network
+        //because it makes little sense to measure "how central" a node is in terms of similarity (I think)
+        //whereas it is interesting to know where central nodes (in the original network) land in the similarity network.
+        //in particular: do they end up being neighbors, or "chiefs" of separate regional kingdoms?
+
         Clock computingbetweennessClock = new Clock("computing betweenneess scores in the initial network");
-        JgraphTBuilder graphBuilder = new JgraphTBuilder(mapUndirected);
+        JgraphTBuilder graphBuilder;
+        if (Main.directedNetwork) {
+            graphBuilder = new JgraphTBuilder(mapUndirected);
+        } else {
+            graphBuilder = new JgraphTBuilder(map);
+        }
+
         DirectedGraph<Short, DefaultEdge> g = graphBuilder.getGraph();
         mapBetweenness = new HashMap();
 
-//        System.out.println("size of mapNodes: "+mapNodes.size());
 
 
         for (short vertex = 0; vertex < mapNodes.size(); vertex++) {

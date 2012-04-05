@@ -4,7 +4,6 @@
  */
 package Gaze;
 
-import com.google.common.collect.HashBiMap;
 import com.google.common.collect.TreeMultimap;
 import java.util.HashSet;
 import java.util.Iterator;
