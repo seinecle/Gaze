@@ -18,18 +18,18 @@ import org.jgrapht.graph.DefaultEdge;
  */
 public class JgraphTBuilder {
 
-    static DirectedGraph<Short, DefaultEdge> g =
-            new DefaultDirectedGraph<Short, DefaultEdge>(DefaultEdge.class);
-    HashSet<Short> vertices = new HashSet();
+    static DirectedGraph<Integer, DefaultEdge> g =
+            new DefaultDirectedGraph<Integer, DefaultEdge>(DefaultEdge.class);
+    HashSet<Integer> vertices = new HashSet();
 
-    JgraphTBuilder(TreeMultimap<Short, Short> mapUndirected) {
+    JgraphTBuilder(TreeMultimap<Integer, Integer> mapUndirected) {
 
 
 
-        Iterator<Entry<Short, Short>> ITmap = mapUndirected.entries().iterator();
+        Iterator<Entry<Integer, Integer>> ITmap = mapUndirected.entries().iterator();
 
         while (ITmap.hasNext()) {
-            Entry<Short, Short> currEntry = ITmap.next();
+            Entry<Integer, Integer> currEntry = ITmap.next();
 
             g.addVertex(currEntry.getKey());
             g.addVertex(currEntry.getValue());
@@ -43,7 +43,7 @@ public class JgraphTBuilder {
 
     }
 
-    DirectedGraph<Short, DefaultEdge> getGraph(){
+    DirectedGraph<Integer, DefaultEdge> getGraph(){
         
         return g;
     }

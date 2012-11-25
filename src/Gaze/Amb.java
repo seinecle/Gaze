@@ -21,7 +21,7 @@ import org.jgrapht.graph.DefaultEdge;
  *
  * @author C. Levallois
  */
-public class AdjacencyMatrixBuilder {
+public class Amb {
 
     private BufferedReader br;
     private final String str;
@@ -29,25 +29,25 @@ public class AdjacencyMatrixBuilder {
     private HashSet<String> setNodes = new HashSet();
     private HashSet<String> setSources = new HashSet();
     private HashSet<String> setTargets = new HashSet();
-    private TreeSet<Short> setSourcesShort = new TreeSet();
-    public static HashMultiset<Short> multisetTargets = HashMultiset.create();
-    public static HashBiMap<String, Short> mapNodes = HashBiMap.create();
-    public static HashBiMap<String, Short> mapSources = HashBiMap.create();
-    public static HashBiMap<String, Short> mapTargets = HashBiMap.create();
-    public static TreeMultimap<Short, Short> map = TreeMultimap.create();
-    public static TreeMultimap<Short, Short> mapUndirected = TreeMultimap.create();
-    public static TreeMultimap<Short, Short> mapInverse = TreeMultimap.create();
+    private TreeSet<Integer> setSourcesInteger = new TreeSet();
+    public static HashMultiset<Integer> multisetTargets = HashMultiset.create();
+    public static HashBiMap<String, Integer> mapNodes = HashBiMap.create();
+    public static HashBiMap<String, Integer> mapSources = HashBiMap.create();
+    public static HashBiMap<String, Integer> mapTargets = HashBiMap.create();
+    public static TreeMultimap<Integer, Integer> map = TreeMultimap.create();
+    public static TreeMultimap<Integer, Integer> mapUndirected = TreeMultimap.create();
+    public static TreeMultimap<Integer, Integer> mapInverse = TreeMultimap.create();
     private String sourceNode;
     private String targetNode;
     private Float weight;
-    private HashMap<Pair<Short, Short>, Float> mapEdgeToWeight = new HashMap();
+    private HashMap<Pair<Integer, Integer>, Float> mapEdgeToWeight = new HashMap();
     private int countLines = 0;
     public static SparseVector[] listVectors;
-    private static Iterator<Short> nodesIt;
+    private static Iterator<Integer> nodesIt;
     private static SparseVector vectorMJT;
-    public static HashMap<Short, Integer> mapBetweenness;
+    public static HashMap<Integer, Integer> mapBetweenness;
 
-    AdjacencyMatrixBuilder(String str) {
+    Amb(String str) {
 
         this.str = str;
 
@@ -58,9 +58,9 @@ public class AdjacencyMatrixBuilder {
 
 
 
-        short n = 0;
-        short s = 0;
-        short t = 0;
+        Integer n = 0;
+        Integer s = 0;
+        Integer t = 0;
 
         //***
         //
@@ -117,7 +117,7 @@ public class AdjacencyMatrixBuilder {
 
                 if (newSource) {
                     mapSources.put(sourceNode, s);
-                    setSourcesShort.add(s);
+                    setSourcesInteger.add(s);
                     s++;
 
                 }
@@ -135,7 +135,7 @@ public class AdjacencyMatrixBuilder {
 
 //for huge networks, these lines could be useful because they make the matrix much more sparse, at a negligible cost of precision            
             if (weight < 0.0001) {
-                weight = (float)0;
+                weight = (float) 0;
             }
 
 
@@ -192,7 +192,7 @@ public class AdjacencyMatrixBuilder {
         //depending on whether the network is directed or not
         if (Main.directedNetwork) {
 
-            nodesIt = setSourcesShort.iterator();
+            nodesIt = setSourcesInteger.iterator();
         } else {
 
             nodesIt = mapNodes.values().iterator();
@@ -203,11 +203,11 @@ public class AdjacencyMatrixBuilder {
 
 
 
-            Short currNode = nodesIt.next();
-//            System.out.println("number of targets associated with source "+currNode+": "+AdjacencyMatrixBuilder.map.get(currNode).size());
+            Integer currNode = nodesIt.next();
+//            System.out.println("number of targets associated with source " + currNode + ": " + Amb.map.get(currNode).size());
 
 
-            SortedSet<Short> targets = new TreeSet();
+            SortedSet<Integer> targets = new TreeSet();
 
 
             //with this step, one gets all the target nodes corresponding to the current source node (directed network)
@@ -215,7 +215,7 @@ public class AdjacencyMatrixBuilder {
             //one needs to get all the sources corresponding to the current node as a target, + all the targets corresponding to this node as a source.
             // so the name "targets" for the sorted set is misleading, since in the case of undirected networks in includes sources too. Oh, well.
             if (Main.directedNetwork) {
-//                System.out.println("currNode: " + mapSources.inverse().get(currNode)+" (index ="+currNode+")");
+//                System.out.println("currNode: " + mapSources.inverse().get(currNode) + " (index =" + currNode + ")");
                 targets = map.get(currNode);
 //                System.out.println("Size of the set of connected nodes for node " + mapSources.inverse().get(currNode) + ": " + targets.size());
 //                System.out.println("list of connected nodes:" +targets);
@@ -232,15 +232,15 @@ public class AdjacencyMatrixBuilder {
 
             //Now, we iterate through this set of "targets" to retrieve the weights of all (currNode, currTargets).
             // this step should be skipped in the case of unweighted networks, no?
-            // also, not the 2 sub steps:
+            // also, note the 2 sub steps:
             // - the first one is for all networks
             // the second one is for undirected networks only
 
-            Iterator<Short> targetsIt = targets.iterator();
-            TreeMap<Float, Short> setCurrWeights = new TreeMap();
+            Iterator<Integer> targetsIt = targets.iterator();
+            TreeMultimap<Float, Integer> setCurrWeights = TreeMultimap.create();
             while (targetsIt.hasNext()) {
 
-                Short currTarget = targetsIt.next();
+                Integer currTarget = targetsIt.next();
 //                System.out.println("current connected Node: " + currTarget);
 
 
@@ -260,7 +260,7 @@ public class AdjacencyMatrixBuilder {
                 targetsIt = targets.iterator();
                 while (targetsIt.hasNext()) {
 
-                    Short currTarget = targetsIt.next();
+                    Integer currTarget = targetsIt.next();
 //                    System.out.println("current connected Node (in undirected mode): " + currTarget);
 
                     Float currWeight = mapEdgeToWeight.get(new Pair(currTarget, currNode));
@@ -269,7 +269,7 @@ public class AdjacencyMatrixBuilder {
                     }
 //                    currWeight = mapEdgeToWeight.get(new Pair(currTarget, currNode));
 //                    System.out.println("currWeight: " + currWeight);
-                    setCurrWeights.put(currWeight, currTarget);
+                    setCurrWeights.put(-currWeight, currTarget);
                 }
             }
 
@@ -286,13 +286,13 @@ public class AdjacencyMatrixBuilder {
             // you can see that in the definition of the size of the vector just below
 
             int countTargets = 0;
-            NavigableMap descMap = setCurrWeights.descendingMap();
-            Iterator<Entry<Float, Short>> ITsetCurrWeights = descMap.entrySet().iterator();
+            Iterator<Entry<Float, Integer>> ITsetCurrWeights = setCurrWeights.entries().iterator();
 
 //            System.out.println("nb of targets: " + targets.size());
 
             if (Main.directedNetwork) {
                 vectorMJT = new SparseVector(multisetTargets.elementSet().size());
+                System.out.println("size of vectorMJT: " + vectorMJT.size());
 
             } else {
                 vectorMJT = new SparseVector(mapNodes.size());
@@ -300,8 +300,9 @@ public class AdjacencyMatrixBuilder {
 
             //this is where the threshold of how many targets are considered for the calculus of the cosine.
             while (ITsetCurrWeights.hasNext()) {
-                Entry<Float, Short> currEntry = ITsetCurrWeights.next();
-                Short currTarget = currEntry.getValue();
+                System.out.println("iteration...");
+                Entry<Float, Integer> currEntry = ITsetCurrWeights.next();
+                Integer currTarget = currEntry.getValue();
 //                System.out.println("current connected node in the loop: " + currTarget);
                 Float currWeight = currEntry.getKey();
 //                System.out.println("to which the current weight considered for inclusion is: "+currWeight);
@@ -317,9 +318,10 @@ public class AdjacencyMatrixBuilder {
 //                System.out.println("vectorPos: " + vectorPos);
 //                System.out.println("currWeight: " + currWeight);
                 if (Main.weightedNetwork) {
-                    vectorMJT.set(vectorPos, (double) currWeight);
+                    vectorMJT.set(vectorPos, (double) - currWeight);
                 } else {
                     vectorMJT.set(vectorPos, 1.00);
+//                    System.out.println("setting a value of 1 in vectorMJT, at position: " + vectorPos);
                 }
 
             }
@@ -356,12 +358,12 @@ public class AdjacencyMatrixBuilder {
             graphBuilder = new JgraphTBuilder(map);
         }
 
-        DirectedGraph<Short, DefaultEdge> g = graphBuilder.getGraph();
+        DirectedGraph<Integer, DefaultEdge> g = graphBuilder.getGraph();
         mapBetweenness = new HashMap();
 
 
 
-        for (short vertex = 0; vertex < mapNodes.size(); vertex++) {
+        for (int vertex = 0; vertex < mapNodes.size(); vertex++) {
 
             if (Main.directedNetwork) {
 //                System.out.println(mapNodes.inverse().get(vertex)+" "+g.inDegreeOf(vertex));    

@@ -45,18 +45,18 @@ public class CosineCalculation implements Runnable {
 
         //to clarify: sources and targets refer to the 2 elements of a pair of nodes, that's all
         //without a reference to which node was actually a source in the initial edge list, and which was a target
-        SparseVector svSource = new SparseVector(1);
-        SparseVector svTarget = new SparseVector(1);
+        SparseVector svSource;
+        SparseVector svTarget;
 
 
         Clock computeSimilarityClock = new Clock("computing similarity with\nsparseVectors: " + Main.useSparseVectors);
-        
+
         //the number of nodes which will appear in the final similarity network
         //corresponds to the number of vectors contained in the list created in AdjacencyMtrixBuilder
         numNodes = listVectors.length;
-//      numTargets = AdjacencyMatrixBuilder.setTargetsShort.size();
-        
-        
+//      numTargets = Amb.setTargetsShort.size();
+
+
         //this looks complicated but is simply the number of elements in the networks and all their combinations
         numCalculations = Math.pow(numNodes, 2) / 2;
 
@@ -68,7 +68,7 @@ public class CosineCalculation implements Runnable {
         //this is where the adjacency matrix for the final network is built
         Main.similarityMatrix = new FlexCompColMatrix(numNodes, numNodes);
 
-        System.out.println("size of the similiarity matrix: " + numNodes + " x " + numNodes);
+        System.out.println("size of the similarity matrix: " + numNodes + " x " + numNodes);
 
         //1. iteration through all nodes of the similarityMatrix
 
@@ -77,69 +77,66 @@ public class CosineCalculation implements Runnable {
         matrixClock = new Clock("clocking the first " + Main.testruns + " calculus");
 
         for (int i = 0; i < numNodes; i++) {
-            
+
             //in the case of undirected networks, the vector can be empty
             //because there...???
-            if (AdjacencyMatrixBuilder.listVectors[i] == null) {
+            if (Amb.listVectors[i] == null) {
                 continue;
             }
-            svSource = AdjacencyMatrixBuilder.listVectors[i];
+            svSource = Amb.listVectors[i];
             norms.add(svSource.norm(Vector.Norm.Two));
+//            System.out.println("index source: " + i);
 
             for (int j = 0; j < numNodes; j++) {
-                if (AdjacencyMatrixBuilder.listVectors[j] == null) {
+                if (Amb.listVectors[j] == null) {
                     continue;
                 }
 
                 if (j < i) {
+//                    System.out.println("index target: " + j);
 
                     Main.countCalculus++;
                     //System.out.println(Main.countCalculus);
-                    if (Main.countCalculus % 100000 == 0) {
-                        long elapsedtimeInSeconds = computeSimilarityClock.getElapsedTime();
-                        //double currPercentAdvance = (Main.countCalculus / numCalculations) * 100;
-                        double remainingTime = (elapsedtimeInSeconds * numCalculations / Main.countCalculus) - elapsedtimeInSeconds;
-                        if (remainingTime
-                                < 1000) {
-                            logText = "time remaining: " + remainingTime + " milliseconds" + newLine + interval;
-                            System.out.print(logText);
-                        } else if (remainingTime < 60000) {
-                            logText = "time remaining: " + Math.round(remainingTime / 1000) + " seconds" + newLine + interval;
-                            System.out.print(logText);
-                        } else {
-                            logText = "time remaining: " + Math.round(remainingTime / 60000) + " minutes " + Math.round((remainingTime % 60000) / 1000) + " seconds" + newLine + interval;
-                            System.out.print(logText);
+//                    if (Main.countCalculus % 100000 == 0) {
+//                        long elapsedtimeInSeconds = computeSimilarityClock.getElapsedTime();
+//                        //double currPercentAdvance = (Main.countCalculus / numCalculations) * 100;
+//                        double remainingTime = (elapsedtimeInSeconds * numCalculations / Main.countCalculus) - elapsedtimeInSeconds;
+//                        if (remainingTime
+//                                < 1000) {
+//                            logText = "time remaining: " + remainingTime + " milliseconds" + newLine + interval;
+//                            System.out.print(logText);
+//                        } else if (remainingTime < 60000) {
+//                            logText = "time remaining: " + Math.round(remainingTime / 1000) + " seconds" + newLine + interval;
+//                            System.out.print(logText);
+//                        } else {
+//                            logText = "time remaining: " + Math.round(remainingTime / 60000) + " minutes " + Math.round((remainingTime % 60000) / 1000) + " seconds" + newLine + interval;
+//                            System.out.print(logText);
+//
+//                        }
+//                    }
 
-                        }
-                    }
-
-                    svTarget = AdjacencyMatrixBuilder.listVectors[j];
+                    svTarget = Amb.listVectors[j];
 
 
                     synchronized (Main.similarityMatrix) {
-
-
-
                         sourceIndexes = svSource.getIndex();
+//                        System.out.println("svSource.getIndex().size: " + sourceIndexes.length);
                         listSourceIndex = new ArrayList();
                         for (int s = 0; s < sourceIndexes.length; s++) {
-
                             listSourceIndex.add(sourceIndexes[s]);
-
                         }
-                        //System.out.println(listSourceIndex.size());
+//                        System.out.println(listSourceIndex.size());
                         targetIndexes = svTarget.getIndex();
+//                        System.out.println("svTarget.getIndex().size: " + targetIndexes.length);
+
                         listTargetIndex = new ArrayList();
                         for (int s = 0; s < targetIndexes.length; s++) {
-
                             listTargetIndex.add(targetIndexes[s]);
-
                         }
-                        //System.out.println(listTargetIndex.size());
+//                        System.out.println(listTargetIndex.size());
 
                         listSourceIndex.retainAll(listTargetIndex);
                         if (!listSourceIndex.isEmpty()) {
-                            //System.out.println("intersect btw sets: "+setSource.size());
 
                             doCalculus(svSource, svTarget, i, j);
                         }
@@ -150,7 +147,7 @@ public class CosineCalculation implements Runnable {
 
                 } else {
 
-                        Main.similarityMatrix.set(i, j, 0);
+                    Main.similarityMatrix.set(i, j, 0);
 
                 }
 
@@ -294,7 +291,7 @@ public class CosineCalculation implements Runnable {
         double result = source.dot(target) / (CosineCalculation.norms.get(i) * CosineCalculation.norms.get(j));
         //System.out.println("result in the runnable: " + result);
 //    Triple similarityResult = new Triple(i,j,result);
-            Main.similarityMatrix.set(i, j, result);
+        Main.similarityMatrix.set(i, j, result);
 //    long endTime = System.currentTimeMillis();
 //    CosineCalculation.cellTime = CosineCalculation.cellTime + endTime-currentTime; 
     }

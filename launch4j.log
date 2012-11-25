@@ -1,0 +1,22 @@
+
+
+CmdLine:	D:\Docs Pro Clement\NetBeansProjects\Gaze\gaze.exe --l4j-debug
+WOW64:		yes
+Check launcher:	 (n/a)
+64-bit search:	SOFTWARE\JavaSoft\Java Runtime Environment...
+Ignore:		SOFTWARE\JavaSoft\Java Runtime Environment\1.6
+Ignore:		SOFTWARE\JavaSoft\Java Runtime Environment\1.6.0_31
+Match:		SOFTWARE\JavaSoft\Java Runtime Environment\1.7
+Match:		SOFTWARE\JavaSoft\Java Runtime Environment\1.7.0_03
+Using 64-bit runtime.
+64-bit search:	SOFTWARE\JavaSoft\Java Development Kit...
+Ignore:		SOFTWARE\JavaSoft\Java Development Kit\1.6
+Ignore:		SOFTWARE\JavaSoft\Java Development Kit\1.6.0_31
+Ignore:		SOFTWARE\JavaSoft\Java Development Kit\1.7
+Ignore:		SOFTWARE\JavaSoft\Java Development Kit\1.7.0_03
+Using 64-bit runtime.
+Check launcher:	C:\Program Files\Java\jre7\bin\javaw.exe (OK)
+Launcher:	C:\Program Files\Java\jre7\bin\javaw.exe
+Launcher args:	-jar "D:\Docs Pro Clement\NetBeansProjects\Gaze\dist\Gaze.jar"
+Args length:	62/32768 chars
+Exit code:	0

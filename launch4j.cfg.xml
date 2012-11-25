@@ -2,7 +2,7 @@
   <dontWrapJar>true</dontWrapJar>
   <headerType>gui</headerType>
   <jar>Gaze.jar</jar>
-  <outfile>C:\Users\C. Levallois\Documents\NetBeansProjects\Gaze\dist\gaze.exe</outfile>
+  <outfile>D:\Docs Pro Clement\NetBeansProjects\Gaze\dist\gaze.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir></chdir>

@@ -105,7 +105,7 @@ public class Screen_2 extends javax.swing.JFrame {
 
         jLabel4.setText("<html><b>field separator</b><br>edges list should be like:<br>source[field sep]target[field sep]weight<br>(weight is optional)</html>");
 
-        weightNetwork.setText("weighted network");
+        weightNetwork.setText("unweighted network");
         weightNetwork.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 weightNetworkActionPerformed(evt);
@@ -125,7 +125,7 @@ public class Screen_2 extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 540, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 10, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -144,7 +144,7 @@ public class Screen_2 extends javax.swing.JFrame {
                             .addComponent(maxTargets4Calc, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(cosineMin, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(minOccAsSource, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap(37, Short.MAX_VALUE))))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -234,9 +234,9 @@ public class Screen_2 extends javax.swing.JFrame {
             System.out.println("toggle status is: "+toggleWeightedNetwork);
             weightNetwork.setSelected(toggleWeightedNetwork);
             if (weightNetwork.isSelected()) {
-                weightNetwork.setText("unweighted network");
-            } else {
                 weightNetwork.setText("weighted network");
+            } else {
+                weightNetwork.setText("unweighted network");
             }
 
     }

@@ -33,7 +33,7 @@ public class Main implements Runnable{
    this.directedNetwork = !Boolean.valueOf(isUndirected);
         System.out.println("directedNetwork: "+directedNetwork);
         
-   this.weightedNetwork = !Boolean.valueOf(isUnWeighted);
+   this.weightedNetwork = Boolean.valueOf(isUnWeighted);
         System.out.println("weightedNetwork: "+weightedNetwork);
 
    this.cosineThreshold = Float.valueOf(cosineMin);
@@ -93,9 +93,11 @@ public class Main implements Runnable{
         try {
             
             //this line is for the users who did not change the default value of zero to 1 when the network is directed
-            if(directedNetwork & minNbofCitationsASourceShouldMake == 0) minNbofCitationsASourceShouldMake = 1;
+            if(directedNetwork & minNbofCitationsASourceShouldMake == 0) {
+                minNbofCitationsASourceShouldMake = 1;
+            }
             
-            AdjacencyMatrixBuilder tr = new AdjacencyMatrixBuilder(fieldSeparator);
+            Amb tr = new Amb(fieldSeparator);
             SparseVector[] listVectors = tr.EdgeListToMatrix();
 
 
@@ -113,7 +115,7 @@ public class Main implements Runnable{
     //        This invert operation symply inversts keys and values in the map for ease of retrieval - nothing more!
 
 
-            BiMap<Short,String> inverseMapSources = AdjacencyMatrixBuilder.mapSources.inverse();
+            BiMap<Integer,String> inverseMapSources = Amb.mapSources.inverse();
             StringBuilder toBeWritten = new StringBuilder();
             Iterator<MatrixEntry> itSM = similarityMatrix.iterator();
             
@@ -132,11 +134,11 @@ public class Main implements Runnable{
 //
 //                if (directedNetwork) {
 ////                    System.out.println("before the condition");
-////                    System.out.println("currElement.column(): "+inverseMapSources.get((short) currElement.column())+ "  "+currElement.column());
-////                    System.out.println("currElement.row(): "+inverseMapSources.get((short) currElement.row())+ "  "+currElement.row());
+////                    System.out.println("currElement.column(): "+inverseMapSources.get((int) currElement.column())+ "  "+currElement.column());
+////                    System.out.println("currElement.row(): "+inverseMapSources.get((int) currElement.row())+ "  "+currElement.row());
 //
-//                    int targetPerSourceColumn = AdjacencyMatrixBuilder.map.get((short) currElement.column()).size();
-//                    int targetPerSourceRow = AdjacencyMatrixBuilder.map.get((short) currElement.row()).size();
+//                    int targetPerSourceColumn = Amb.map.get((int) currElement.column()).size();
+//                    int targetPerSourceRow = Amb.map.get((int) currElement.row()).size();
 //
 ////                    System.out.println("number of targets corresponding to this source (col): "+targetPerSourceColumn);
 ////                    System.out.println("number of targets corresponding to this source (row): "+targetPerSourceRow);                
@@ -145,7 +147,7 @@ public class Main implements Runnable{
 //                            ) {
 //
 ////                        System.out.println("past the condition");
-//                        toBeWritten.append("<edge source = \"").append(inverseMapSources.get((short) currElement.column())).append("\" target = \"").append(inverseMapSources.get((short) currElement.row())).append("\" weight = \"").append(csCoeff).append("\"/>").append("\n");
+//                        toBeWritten.append("<edge source = \"").append(inverseMapSources.get((int) currElement.column())).append("\" target = \"").append(inverseMapSources.get((int) currElement.row())).append("\" weight = \"").append(csCoeff).append("\"/>").append("\n");
 //
 //                    }
 //
@@ -154,7 +156,7 @@ public class Main implements Runnable{
 //
 //                    if (csCoeff > cosineThreshold) {
 //
-//                        toBeWritten.append("<edge source = \"").append(inverseMapNodes.get((short) currElement.column())).append("\" target = \"").append(inverseMapNodes.get((short) currElement.row())).append("\" weight = \"").append(csCoeff).append("\"/>").append("\n");
+//                        toBeWritten.append("<edge source = \"").append(inverseMapNodes.get((int) currElement.column())).append("\" target = \"").append(inverseMapNodes.get((int) currElement.row())).append("\" weight = \"").append(csCoeff).append("\"/>").append("\n");
 //                    }
 //                }
 //            }
@@ -179,16 +181,18 @@ public class Main implements Runnable{
 
                 MatrixEntry currElement = itSM.next();
                 double csCoeff = currElement.get();
-                if (currElement.column()==currElement.row()) continue;
+                if (currElement.column()==currElement.row()) {
+                    continue;
+                }
                 if (directedNetwork) {
 //                    System.out.println("before the condition");
-//                    System.out.println("currElement.column(): "+inverseMapSources.get((short) currElement.column())+ "  "+currElement.column());
-//                    System.out.println("currElement.row(): "+inverseMapSources.get((short) currElement.row())+ "  "+currElement.row());
+//                    System.out.println("currElement.column(): "+inverseMapSources.get((int) currElement.column())+ "  "+currElement.column());
+//                    System.out.println("currElement.row(): "+inverseMapSources.get((int) currElement.row())+ "  "+currElement.row());
 
-                    int nbOccAsSourceColumn = AdjacencyMatrixBuilder.map.get((short) currElement.column()).size();
-                    int nbOccAsSourceRow = AdjacencyMatrixBuilder.map.get((short) currElement.row()).size();
-                    int nbOccAsTargetColumn = AdjacencyMatrixBuilder.multisetTargets.count(AdjacencyMatrixBuilder.mapTargets.get((inverseMapSources.get((short)currElement.column()))));
-                    int nbOccAsTargetRow = AdjacencyMatrixBuilder.multisetTargets.count(AdjacencyMatrixBuilder.mapTargets.get((inverseMapSources.get((short)currElement.row()))));
+                    int nbOccAsSourceColumn = Amb.map.get((int) currElement.column()).size();
+                    int nbOccAsSourceRow = Amb.map.get((int) currElement.row()).size();
+                    int nbOccAsTargetColumn = Amb.multisetTargets.count(Amb.mapTargets.get((inverseMapSources.get((int)currElement.column()))));
+                    int nbOccAsTargetRow = Amb.multisetTargets.count(Amb.mapTargets.get((inverseMapSources.get((int)currElement.row()))));
 //                    System.out.println("occurrences as source (col): "+nbOccAsSourceColumn);
 //                    System.out.println("occurrences as source (row): "+nbOccAsSourceRow);                
 //                    System.out.println("occurrences as target (col): "+nbOccAsTargetColumn);
@@ -201,7 +205,7 @@ public class Main implements Runnable{
                             ) {
 
 //                        System.out.println("past the condition");
-                        toBeWritten.append(inverseMapSources.get((short) currElement.column())).append(",").append(inverseMapSources.get((short) currElement.row())).append(",").append(csCoeff).append(",").append("undirected").append("\n");
+                        toBeWritten.append(inverseMapSources.get((int) currElement.column())).append(",").append(inverseMapSources.get((int) currElement.row())).append(",").append(csCoeff).append(",").append("undirected").append("\n");
 
                     }
 
@@ -210,7 +214,7 @@ public class Main implements Runnable{
 
                     if (csCoeff > cosineThreshold) {
 
-                       toBeWritten.append(inverseMapSources.get((short) currElement.column())).append(",").append(inverseMapSources.get((short) currElement.row())).append(",").append(csCoeff).append(",").append("undirected").append("\n");                    }
+                       toBeWritten.append(inverseMapSources.get((int) currElement.column())).append(",").append(inverseMapSources.get((int) currElement.row())).append(",").append(csCoeff).append(",").append("undirected").append("\n");                    }
                 }
             }
 
@@ -224,17 +228,18 @@ public class Main implements Runnable{
             toBeWritten = new StringBuilder();
             toBeWritten.append("id,centrality\n");
 
-            Iterator<Entry<String,Short>> ITMapNodes = AdjacencyMatrixBuilder.mapNodes.entrySet().iterator();
+            Iterator<Entry<String,Integer>> ITMapNodes = Amb.mapNodes.entrySet().iterator();
             
             while (ITMapNodes.hasNext()){
-                Entry<String,Short> currEntry = ITMapNodes.next();
+                Entry<String,Integer> currEntry = ITMapNodes.next();
 //                System.out.println("currEntry name: "+currEntry.getKey());
-//                System.out.println("currEntry count: "+AdjacencyMatrixBuilder.mapUndirected.keys().count(currEntry.getValue()));
-//                System.out.println("currEntry times referenced: "+Collections.frequency(AdjacencyMatrixBuilder.mapUndirected.values(),currEntry.getValue()));
+//                System.out.println("currEntry count: "+Amb.mapUndirected.keys().count(currEntry.getValue()));
+//                System.out.println("currEntry times referenced: "+Collections.frequency(Amb.mapUndirected.values(),currEntry.getValue()));
                 
-                if(AdjacencyMatrixBuilder.multisetTargets.count(currEntry.getValue())<minNbofTimesASourceShouldBeCited | AdjacencyMatrixBuilder.map.keys().count(currEntry.getValue())< minNbofCitationsASourceShouldMake)
-                        continue;
-                int currCentrality = AdjacencyMatrixBuilder.mapBetweenness.get(currEntry.getValue());
+                if(Amb.multisetTargets.count(currEntry.getValue())<minNbofTimesASourceShouldBeCited | Amb.map.keys().count(currEntry.getValue())< minNbofCitationsASourceShouldMake) {
+                    continue;
+                }
+                int currCentrality = Amb.mapBetweenness.get(currEntry.getValue());
                 toBeWritten.append(currEntry.getKey()).append(",").append(currCentrality).append("\n");
             }
             
