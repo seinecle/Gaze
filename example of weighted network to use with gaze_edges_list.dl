@@ -1,0 +1,10 @@
+source,target,Weight,type
+John,Kate,1.0,undirected
+John,Clifford,1.0,undirected
+John,Alice,0.5366563145999494,undirected
+Kate,Clifford,1.0,undirected
+Kate,Alice,0.5366563145999494,undirected
+Harold,Serge,1.0,undirected
+Harold,Alice,0.7155417527999326,undirected
+Serge,Alice,0.7155417527999327,undirected
+Clifford,Alice,0.5366563145999496,undirected

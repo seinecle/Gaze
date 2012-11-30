@@ -1,3 +1,16 @@
+//this is a directed network of products
+//first line reads: John likes ice-cream with an intensity of 8 (very much!)
+//
+//
+//***********
+//By selecting "directed network" and "weighted network" in the options, Gaze will find how John, Kate and the others connect in terms of products they like
+//
+// We expect that John, Kate, Clifford will be closely related. We expect Harold and Serge to be closely related. We expected Alice to be related to both these groups, but a bit more weakly. Run Gaze, import in Gephi and see that it is indeed the case!
+//***********
+//***********
+//Note: here it does not make sense to select "undirected network" since only the source nodes are truly relevant (John etc.), not the target nodes (ice-cream etc.).
+//***********
+//beginning of the network:
 John,ice-cream
 Kate,ice-cream
 Harold,soda

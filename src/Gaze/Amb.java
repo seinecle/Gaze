@@ -72,8 +72,11 @@ public class Amb {
         Clock readingFile = new Clock("reading input file");
         br = new BufferedReader(new FileReader(Controller.wk + Controller.file));
 
-        currLine = br.readLine();
-        while (currLine != null) {
+        while ((currLine = br.readLine()) != null) {
+            if (currLine.startsWith("//")) {
+                continue;
+            }
+
             countLines++;
 
             //for debugging purposes: the buffered reader will stop reading when it meets a line with "stop" in the edges list file
@@ -156,7 +159,6 @@ public class Amb {
 
             }
 
-            currLine = br.readLine();
         }
         br.close();
 
@@ -318,7 +320,7 @@ public class Amb {
 //                System.out.println("vectorPos: " + vectorPos);
 //                System.out.println("currWeight: " + currWeight);
                 if (Controller.weightedNetwork) {
-                    vectorMJT.set(vectorPos, (double) - currWeight);
+                    vectorMJT.set(vectorPos, (double) -currWeight);
                 } else {
                     vectorMJT.set(vectorPos, 1.00);
 //                    System.out.println("setting a value of 1 in vectorMJT, at position: " + vectorPos);
