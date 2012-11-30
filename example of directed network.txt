@@ -1,0 +1,8 @@
+Nature,Science
+Journal of Economics,Journal of Finance
+Journal of Finance,Econometrica
+Econometrica,Review of Economic Studies
+Econometrica,Journal of Finance
+Econometrica,Science
+Review of Economic Studies,Science
+Review of Economic Studies,Journal of Economics

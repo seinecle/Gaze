@@ -20,7 +20,7 @@ public class Screen_2 extends javax.swing.JFrame {
 
     public Screen_2() {
         initComponents();
-        directedNetwork.setSelected(false);
+        directedNetwork.setSelected(true);
         toggleDirectedNetwork = directedNetwork.isSelected();
 
     }
@@ -203,9 +203,9 @@ public class Screen_2 extends javax.swing.JFrame {
             System.out.println("toggle status is: "+toggleDirectedNetwork);
             directedNetwork.setSelected(toggleDirectedNetwork);
             if (directedNetwork.isSelected()) {
-                directedNetwork.setText("undirected network");
-            } else {
                 directedNetwork.setText("directed network");
+            } else {
+                directedNetwork.setText("undirected network");
             }
 
     }//GEN-LAST:event_directedNetworkActionPerformed

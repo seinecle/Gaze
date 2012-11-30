@@ -70,7 +70,7 @@ public class Amb {
 
 
         Clock readingFile = new Clock("reading input file");
-        br = new BufferedReader(new FileReader(Main.wk + Main.file));
+        br = new BufferedReader(new FileReader(Controller.wk + Controller.file));
 
         currLine = br.readLine();
         while (currLine != null) {
@@ -86,7 +86,7 @@ public class Amb {
             targetNode = fields[1];
 
             //assigns an arbitrary value of 0.5 to each edge if the network is unwieghted
-            if (Main.weightedNetwork) {
+            if (Controller.weightedNetwork) {
                 weight = Float.valueOf(fields[2]);
             } else {
                 weight = (float) 0.5;
@@ -111,7 +111,7 @@ public class Amb {
 
 
             //this step is to attribute distinct indexes to sources and targets in a directed network
-            if (Main.directedNetwork) {
+            if (Controller.directedNetwork) {
                 boolean newSource = setSources.add(sourceNode);
                 boolean newTarget = setTargets.add(targetNode);
 
@@ -142,7 +142,7 @@ public class Amb {
             //creation of different maps for latter reference
             // note that for a directed network, we need both a map with nodes referenced by their indexes as sources and targets,
             // and a map where they are referenced just as general nodes
-            if (Main.directedNetwork) {
+            if (Controller.directedNetwork) {
                 map.put(mapSources.get(sourceNode), mapTargets.get(targetNode));
                 mapUndirected.put(mapNodes.get(sourceNode), mapNodes.get(targetNode));
 //                System.out.println("put in the map: --key: "+mapSources.get(sourceNode)+" value: "+mapTargets.get(targetNode));
@@ -177,7 +177,7 @@ public class Amb {
         //this creates a list of vectors equal to the number of nodes, or just number of sources,
         //depending on whether the network is directed or not
         // a vector is a list of elements which are going to be the stuff of the similarity calculation.
-        if (Main.directedNetwork) {
+        if (Controller.directedNetwork) {
             listVectors = new SparseVector[mapSources.size()];
         } else {
             listVectors = new SparseVector[setNodes.size()];
@@ -190,7 +190,7 @@ public class Amb {
 
         //this loops through all nodes, or just the sources, to create the similarity matrix
         //depending on whether the network is directed or not
-        if (Main.directedNetwork) {
+        if (Controller.directedNetwork) {
 
             nodesIt = setSourcesInteger.iterator();
         } else {
@@ -214,7 +214,7 @@ public class Amb {
             // but if the network is undirected, that's a bit more tricky:
             //one needs to get all the sources corresponding to the current node as a target, + all the targets corresponding to this node as a source.
             // so the name "targets" for the sorted set is misleading, since in the case of undirected networks in includes sources too. Oh, well.
-            if (Main.directedNetwork) {
+            if (Controller.directedNetwork) {
 //                System.out.println("currNode: " + mapSources.inverse().get(currNode) + " (index =" + currNode + ")");
                 targets = map.get(currNode);
 //                System.out.println("Size of the set of connected nodes for node " + mapSources.inverse().get(currNode) + ": " + targets.size());
@@ -256,7 +256,7 @@ public class Amb {
             }
 
 
-            if (!Main.directedNetwork) {
+            if (!Controller.directedNetwork) {
                 targetsIt = targets.iterator();
                 while (targetsIt.hasNext()) {
 
@@ -290,9 +290,9 @@ public class Amb {
 
 //            System.out.println("nb of targets: " + targets.size());
 
-            if (Main.directedNetwork) {
+            if (Controller.directedNetwork) {
                 vectorMJT = new SparseVector(multisetTargets.elementSet().size());
-                System.out.println("size of vectorMJT: " + vectorMJT.size());
+//                System.out.println("size of vectorMJT: " + vectorMJT.size());
 
             } else {
                 vectorMJT = new SparseVector(mapNodes.size());
@@ -300,13 +300,13 @@ public class Amb {
 
             //this is where the threshold of how many targets are considered for the calculus of the cosine.
             while (ITsetCurrWeights.hasNext()) {
-                System.out.println("iteration...");
+//                System.out.println("iteration...");
                 Entry<Float, Integer> currEntry = ITsetCurrWeights.next();
                 Integer currTarget = currEntry.getValue();
 //                System.out.println("current connected node in the loop: " + currTarget);
                 Float currWeight = currEntry.getKey();
 //                System.out.println("to which the current weight considered for inclusion is: "+currWeight);
-                if (countTargets >= Main.maxNbTargetsPerSourceConsidered4CosineCalc) {
+                if (countTargets >= Controller.maxNbTargetsPerSourceConsidered4CosineCalc) {
 //                    System.out.println("breaking on " + currWeight);
                     break;
                 }
@@ -317,7 +317,7 @@ public class Amb {
                 int vectorPos = (int) currTarget;
 //                System.out.println("vectorPos: " + vectorPos);
 //                System.out.println("currWeight: " + currWeight);
-                if (Main.weightedNetwork) {
+                if (Controller.weightedNetwork) {
                     vectorMJT.set(vectorPos, (double) - currWeight);
                 } else {
                     vectorMJT.set(vectorPos, 1.00);
@@ -350,9 +350,9 @@ public class Amb {
         //whereas it is interesting to know where central nodes (in the original network) land in the similarity network.
         //in particular: do they end up being neighbors, or "chiefs" of separate regional kingdoms?
 
-        Clock computingbetweennessClock = new Clock("computing betweenneess scores in the initial network");
+        Clock computingbetweennessClock = new Clock("computing centrality scores in the initial network");
         JgraphTBuilder graphBuilder;
-        if (Main.directedNetwork) {
+        if (Controller.directedNetwork) {
             graphBuilder = new JgraphTBuilder(mapUndirected);
         } else {
             graphBuilder = new JgraphTBuilder(map);
@@ -365,7 +365,7 @@ public class Amb {
 
         for (int vertex = 0; vertex < mapNodes.size(); vertex++) {
 
-            if (Main.directedNetwork) {
+            if (Controller.directedNetwork) {
 //                System.out.println(mapNodes.inverse().get(vertex)+" "+g.inDegreeOf(vertex));    
                 mapBetweenness.put(vertex, g.inDegreeOf(vertex));
             } else {

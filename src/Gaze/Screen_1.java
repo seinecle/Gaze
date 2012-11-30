@@ -204,7 +204,7 @@ public class Screen_1 extends javax.swing.JFrame {
                 //                    args[1] = String.valueOf(countPDF);
             } catch (NullPointerException e){System.out.println("this value should not be null");}
       
-                Runnable r = new Main(args[0],args[2],args[3],args[4],args[5],args[6],args[7],args[8]);
+                Runnable r = new Controller(args[0],args[2],args[3],args[4],args[5],args[6],args[7],args[8]);
                 new Thread(r).start();
 
 

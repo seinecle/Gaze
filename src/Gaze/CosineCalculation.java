@@ -49,7 +49,7 @@ public class CosineCalculation implements Runnable {
         SparseVector svTarget;
 
 
-        Clock computeSimilarityClock = new Clock("computing similarity with\nsparseVectors: " + Main.useSparseVectors);
+        Clock computeSimilarityClock = new Clock("computing similarity with\nsparseVectors: " + Controller.useSparseVectors);
 
         //the number of nodes which will appear in the final similarity network
         //corresponds to the number of vectors contained in the list created in AdjacencyMtrixBuilder
@@ -66,7 +66,7 @@ public class CosineCalculation implements Runnable {
 
 
         //this is where the adjacency matrix for the final network is built
-        Main.similarityMatrix = new FlexCompColMatrix(numNodes, numNodes);
+        Controller.similarityMatrix = new FlexCompColMatrix(numNodes, numNodes);
 
         System.out.println("size of the similarity matrix: " + numNodes + " x " + numNodes);
 
@@ -74,7 +74,7 @@ public class CosineCalculation implements Runnable {
 
         norms = new ArrayList();
 
-        matrixClock = new Clock("clocking the first " + Main.testruns + " calculus");
+        matrixClock = new Clock("clocking the first " + Controller.testruns + " calculus");
 
         for (int i = 0; i < numNodes; i++) {
 
@@ -95,12 +95,12 @@ public class CosineCalculation implements Runnable {
                 if (j < i) {
 //                    System.out.println("index target: " + j);
 
-                    Main.countCalculus++;
-                    //System.out.println(Main.countCalculus);
-//                    if (Main.countCalculus % 100000 == 0) {
+                    Controller.countCalculus++;
+                    //System.out.println(Controller.countCalculus);
+//                    if (Controller.countCalculus % 100000 == 0) {
 //                        long elapsedtimeInSeconds = computeSimilarityClock.getElapsedTime();
-//                        //double currPercentAdvance = (Main.countCalculus / numCalculations) * 100;
-//                        double remainingTime = (elapsedtimeInSeconds * numCalculations / Main.countCalculus) - elapsedtimeInSeconds;
+//                        //double currPercentAdvance = (Controller.countCalculus / numCalculations) * 100;
+//                        double remainingTime = (elapsedtimeInSeconds * numCalculations / Controller.countCalculus) - elapsedtimeInSeconds;
 //                        if (remainingTime
 //                                < 1000) {
 //                            logText = "time remaining: " + remainingTime + " milliseconds" + newLine + interval;
@@ -118,7 +118,7 @@ public class CosineCalculation implements Runnable {
                     svTarget = Amb.listVectors[j];
 
 
-                    synchronized (Main.similarityMatrix) {
+                    synchronized (Controller.similarityMatrix) {
                         sourceIndexes = svSource.getIndex();
 //                        System.out.println("svSource.getIndex().size: " + sourceIndexes.length);
                         listSourceIndex = new ArrayList();
@@ -147,7 +147,7 @@ public class CosineCalculation implements Runnable {
 
                 } else {
 
-                    Main.similarityMatrix.set(i, j, 0);
+                    Controller.similarityMatrix.set(i, j, 0);
 
                 }
 
@@ -169,10 +169,10 @@ public class CosineCalculation implements Runnable {
 //        double result = 0;
 //
 //
-//        if ("Java".equals(Main.dotProductChoice)) {
+//        if ("Java".equals(Controller.dotProductChoice)) {
 //            result = SDotJava(A, B);
 //        } else {
-//            if ("Cuda".equals(Main.dotProductChoice)) {
+//            if ("Cuda".equals(Controller.dotProductChoice)) {
 //                result = SDotCuda(A, B, n);
 //            }
 //        }
@@ -187,10 +187,10 @@ public class CosineCalculation implements Runnable {
 //        //System.out.println(n);
 //        double result = 0;
 //
-//        if ("Java".equals(Main.euclidianDistChoice)) {
+//        if ("Java".equals(Controller.euclidianDistChoice)) {
 //            result = euclidianDistJava(A, B);
 //        } else {
-//            if ("Cuda".equals(Main.euclidianDistChoice)) {
+//            if ("Cuda".equals(Controller.euclidianDistChoice)) {
 //
 //                result = euclidianDistCuda(h_A, h_B, n);
 //            }
@@ -291,7 +291,7 @@ public class CosineCalculation implements Runnable {
         double result = source.dot(target) / (CosineCalculation.norms.get(i) * CosineCalculation.norms.get(j));
         //System.out.println("result in the runnable: " + result);
 //    Triple similarityResult = new Triple(i,j,result);
-        Main.similarityMatrix.set(i, j, result);
+        Controller.similarityMatrix.set(i, j, result);
 //    long endTime = System.currentTimeMillis();
 //    CosineCalculation.cellTime = CosineCalculation.cellTime + endTime-currentTime; 
     }
