@@ -26,7 +26,7 @@ public class CosineCalculation implements Runnable {
     static double normSource;
     static public ArrayList<Double> norms;
     static public int sizeVector;
-    private double numCalculations;
+    private int numCalculations;
     String logText = "";
     String newLine = "\n";
     String interval = "--------------------------\n";
@@ -58,11 +58,7 @@ public class CosineCalculation implements Runnable {
 
 
         //this looks complicated but is simply the number of elements in the networks and all their combinations
-        numCalculations = Math.pow(numNodes, 2) / 2;
-
-
-
-
+        numCalculations = (int)Math.pow(numNodes, 2) / 2;
 
 
         //this is where the adjacency matrix for the final network is built
@@ -96,6 +92,9 @@ public class CosineCalculation implements Runnable {
 //                    System.out.println("index target: " + j);
 
                     Controller.countCalculus++;
+                    int index = Math.round(((float)Controller.countCalculus * 100 / numCalculations));
+                    Screen_1.pb.setValue(index);
+
                     //System.out.println(Controller.countCalculus);
 //                    if (Controller.countCalculus % 100000 == 0) {
 //                        long elapsedtimeInSeconds = computeSimilarityClock.getElapsedTime();

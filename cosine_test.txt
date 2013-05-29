@@ -1,0 +1,4 @@
+John,ice-cream,1
+John,soda,8
+Clifford,ice-cream,8
+Clifford,soda,1

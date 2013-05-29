@@ -8,11 +8,14 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.TreeMultimap;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.LineNumberReader;
 import java.util.Map.Entry;
 import java.util.*;
 import levallois.clement.utils.Clock;
+import levallois.clement.utils.LogUpdate;
 import no.uib.cipr.matrix.sparse.SparseVector;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -72,27 +75,45 @@ public class Amb {
         Clock readingFile = new Clock("reading input file");
         br = new BufferedReader(new FileReader(Controller.wk + Controller.file));
 
+        //counting total number of lines in the file
+        LineNumberReader lnr = new LineNumberReader(new FileReader(Controller.wk + Controller.file));
+        lnr.skip(Long.MAX_VALUE);
+        int totalLines = lnr.getLineNumber();
+
         while ((currLine = br.readLine()) != null) {
+
             if (currLine.startsWith("//")) {
                 continue;
             }
 
             countLines++;
+            Screen_1.pb.setValue((countLines * 100 / totalLines));
 
             //for debugging purposes: the buffered reader will stop reading when it meets a line with "stop" in the edges list file
             if ("stop".equals(currLine)) {
                 break;
             }
+            try {
+                String[] fields = currLine.split(str);
+                sourceNode = fields[0].trim();
+                targetNode = fields[1].trim();
 
-            String[] fields = currLine.split(str);
-            sourceNode = fields[0];
-            targetNode = fields[1];
-
-            //assigns an arbitrary value of 0.5 to each edge if the network is unwieghted
-            if (Controller.weightedNetwork) {
-                weight = Float.valueOf(fields[2]);
-            } else {
-                weight = (float) 0.5;
+                //assigns an arbitrary value of 0.5 to each edge if the network is unwieghted
+                if (Controller.weightedNetwork) {
+                    weight = Float.valueOf(fields[2]);
+                } else {
+                    weight = (float) 0.5;
+                }
+            } catch (java.lang.ArrayIndexOutOfBoundsException e) {
+                System.out.println("issue with line: " + currLine);
+                LogUpdate.update("issue with line: " + currLine);
+                LogUpdate.update(("line " + countLines + " of your file."));
+                LogUpdate.update("--- one item in the line is missing. The line was skipped ---");
+            } catch (java.lang.NumberFormatException f) {
+                System.out.println("issue with line: " + currLine);
+                LogUpdate.update("issue with line: " + currLine);
+                LogUpdate.update(("line " + countLines + " of your file."));
+                LogUpdate.update("--- should have been a number, not text. The line was skipped ---");
             }
 
 
