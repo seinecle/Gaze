@@ -6,6 +6,7 @@ package Gaze;
 
 import com.google.common.collect.BiMap;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
@@ -62,7 +63,7 @@ public class Controller implements Runnable {
 
     Controller(String wk, String fileName, String isDirected, String isUnWeighted, String cosineMin, String maxTargets4Calc, String minOccAsTarget, String minOccAsSource) {
 
-        this.wk = wk + "\\";
+        this.wk = wk + File.separator;
         this.file = fileName;
         this.directedNetwork = Boolean.valueOf(isDirected);
         System.out.println("directedNetwork: " + directedNetwork);
