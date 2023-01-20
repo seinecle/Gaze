@@ -35,7 +35,7 @@ import org.openide.util.Lookup;
  */
 public class SimilarityFunction {
 
-    public String createSimilarityGraph(Map<String, Set<String>> sourcesAndTargets) {
+    public String createSimilarityGraph(Map<String, Set<String>> sourcesAndTargets, int minTargetsInCommon) {
         try {
             Graph graphResult;
             GraphModel gm;
@@ -53,7 +53,7 @@ public class SimilarityFunction {
 
             similarityMatrixColt = new SparseDoubleMatrix2D(listVectors.length, listVectors.length);
 
-            Thread t = new Thread(new CosineCalculation(listVectors, similarityMatrixColt));
+            Thread t = new Thread(new CosineCalculation(listVectors, similarityMatrixColt, minTargetsInCommon));
             t.start();
             t.join();
 
@@ -125,9 +125,7 @@ public class SimilarityFunction {
             ec.exportWriter(stringWriter, exporterGexf);
             stringWriter.close();
             return stringWriter.toString();
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (InterruptedException ex) {
+        } catch (IOException | InterruptedException ex) {
             Exceptions.printStackTrace(ex);
         }
 

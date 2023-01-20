@@ -20,17 +20,16 @@ public class CosineCalculation implements Runnable {
     private final SparseDoubleMatrix1D[] listVectorsColt;
     private SparseDoubleMatrix2D similarityMatrixColt;
     private ArrayList<Double> normsColt;
-    String logText = "";
-    String newLine = System.lineSeparator();
-    String interval = "--------------------------" + System.lineSeparator();
     int[] arrayOfTargetIndicesForSourceAColt;
     int[] arrayOfTargetIndicesForSourceBColt;
     List<Integer> listOfTargetIndicesForSourceAColt;
     List<Integer> listOfTargetIndicesForSourceBColt;
+    private int minTargetsInCommon = 1;
 
-    public CosineCalculation(SparseDoubleMatrix1D[] listVectors, SparseDoubleMatrix2D similarityMatrixColt) {
+    public CosineCalculation(SparseDoubleMatrix1D[] listVectors, SparseDoubleMatrix2D similarityMatrixColt, int minTargetsInCommon) {
         this.listVectorsColt = listVectors;
         this.similarityMatrixColt = similarityMatrixColt;
+        this.minTargetsInCommon = minTargetsInCommon;
     }
 
     @Override
@@ -89,7 +88,7 @@ public class CosineCalculation implements Runnable {
                         }
 
                         listOfTargetIndicesForSourceAColt.retainAll(listOfTargetIndicesForSourceBColt);
-                        if (!listOfTargetIndicesForSourceAColt.isEmpty()) {
+                        if (listOfTargetIndicesForSourceAColt.size() >= minTargetsInCommon) {
                             doCalculus(vectorOfTargetsForSourceAColt, vectorOfTargetsForSourceBColt, i, j);
                         }
                     }

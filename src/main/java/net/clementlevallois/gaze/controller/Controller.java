@@ -46,19 +46,20 @@ public class Controller {
     //
     private SparseDoubleMatrix2D similarityMatrixColt;
     private BufferedWriter bw;
+    int minTargetsInCommon;
 
     public Controller(Map<String,Set<String>> sourceAndTargets) {
         this.sourceAndTargets = sourceAndTargets;
     }
 
-    public String run() {
+    public String run(int minTargetsInCommon) {
         try {
 
             MatrixBuilder matrixBuilder = new MatrixBuilder(sourceAndTargets, maxNbTargetsPerSourceConsidered4CosineCalc);
             SparseDoubleMatrix1D[] listVectors = matrixBuilder.createListOfSparseVectorsFromEdgeList();
             similarityMatrixColt = new SparseDoubleMatrix2D(listVectors.length, listVectors.length);
 
-            Thread t = new Thread(new CosineCalculation(listVectors, similarityMatrixColt));
+            Thread t = new Thread(new CosineCalculation(listVectors, similarityMatrixColt, minTargetsInCommon));
             t.start();
             t.join();
             System.out.println("Cosine calculated!");
