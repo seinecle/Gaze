@@ -33,7 +33,7 @@ public class Controller {
     //  ##### source files
     //
     //
-    private Map<String,Set<String>> sourceAndTargets;
+    private Map<String, Set<String>> sourceAndTargets;
     //
     // ##### parameters
     //
@@ -45,10 +45,11 @@ public class Controller {
     //
     //
     private SparseDoubleMatrix2D similarityMatrixColt;
+    private SparseDoubleMatrix2D sharedTargetsMatrixColt;
     private BufferedWriter bw;
     int minTargetsInCommon;
 
-    public Controller(Map<String,Set<String>> sourceAndTargets) {
+    public Controller(Map<String, Set<String>> sourceAndTargets) {
         this.sourceAndTargets = sourceAndTargets;
     }
 
@@ -58,12 +59,12 @@ public class Controller {
             MatrixBuilder matrixBuilder = new MatrixBuilder(sourceAndTargets, maxNbTargetsPerSourceConsidered4CosineCalc);
             SparseDoubleMatrix1D[] listVectors = matrixBuilder.createListOfSparseVectorsFromEdgeList();
             similarityMatrixColt = new SparseDoubleMatrix2D(listVectors.length, listVectors.length);
+            sharedTargetsMatrixColt = new SparseDoubleMatrix2D(listVectors.length, listVectors.length);
 
-            Thread t = new Thread(new CosineCalculation(listVectors, similarityMatrixColt, minTargetsInCommon));
-            t.start();
-            t.join();
+            CosineCalculation cosineCalculation = new CosineCalculation(listVectors, minTargetsInCommon);
+           cosineCalculation.run();
             System.out.println("Cosine calculated!");
-
+            similarityMatrixColt = cosineCalculation.getSimilarityMatrixColt();
             Clock printEdgesDL = new Clock("printing a DL file for the edges");
             StringBuilder sb = new StringBuilder();
             sb.append("source,target,Weight,type" + System.lineSeparator());
@@ -82,10 +83,10 @@ public class Controller {
                 sb.append(matrixBuilder.getMapSourcesIndexToLabel().get(rowIndex)).append(",").append(matrixBuilder.getMapSourcesIndexToLabel().get(colIndex)).append(",").append(cellValue).append(",").append("undirected").append(System.lineSeparator());
             }
             printEdgesDL.closeAndPrintClock();
-            System.out.println("result: "+ sb.toString());
+            System.out.println("result: " + sb.toString());
             return sb.toString();
 
-        } catch (InterruptedException | IOException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
             return "error";
 

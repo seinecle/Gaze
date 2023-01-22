@@ -9,31 +9,32 @@ import cern.colt.matrix.impl.SparseDoubleMatrix2D;
 import cern.colt.matrix.linalg.Algebra;
 import java.util.ArrayList;
 import java.util.List;
-import net.clementlevallois.utils.Clock;
 
 /**
  *
  * @author C. Levallois
  */
-public class CosineCalculation implements Runnable {
+public class CosineCalculation {
 
     private final SparseDoubleMatrix1D[] listVectorsColt;
     private SparseDoubleMatrix2D similarityMatrixColt;
+    private SparseDoubleMatrix2D sharedTargetsMatrixColt;
     private ArrayList<Double> normsColt;
-    int[] arrayOfTargetIndicesForSourceAColt;
-    int[] arrayOfTargetIndicesForSourceBColt;
-    List<Integer> listOfTargetIndicesForSourceAColt;
-    List<Integer> listOfTargetIndicesForSourceBColt;
+    private int[] arrayOfTargetIndicesForSourceAColt;
+    private int[] arrayOfTargetIndicesForSourceBColt;
+    private List<Integer> listOfTargetIndicesForSourceAColt;
+    private List<Integer> listOfTargetIndicesForSourceBColt;
     private int minTargetsInCommon = 1;
 
-    public CosineCalculation(SparseDoubleMatrix1D[] listVectors, SparseDoubleMatrix2D similarityMatrixColt, int minTargetsInCommon) {
+    public CosineCalculation(SparseDoubleMatrix1D[] listVectors, int minTargetsInCommon) {
         this.listVectorsColt = listVectors;
-        this.similarityMatrixColt = similarityMatrixColt;
         this.minTargetsInCommon = minTargetsInCommon;
     }
 
-    @Override
     public void run() {
+
+        similarityMatrixColt = new SparseDoubleMatrix2D(listVectorsColt.length, listVectorsColt.length);
+        sharedTargetsMatrixColt = new SparseDoubleMatrix2D(listVectorsColt.length, listVectorsColt.length);
 
         SparseDoubleMatrix1D vectorOfTargetsForSourceAColt;
         SparseDoubleMatrix1D vectorOfTargetsForSourceBColt;
@@ -59,52 +60,64 @@ public class CosineCalculation implements Runnable {
 
                 if (j < i) {
                     vectorOfTargetsForSourceBColt = listVectorsColt[j];
-                    synchronized (similarityMatrixColt) {
-                        arrayOfTargetIndicesForSourceAColt = new int[vectorOfTargetsForSourceAColt.cardinality()];
-                        int indices = 0;
-                        for (int row = vectorOfTargetsForSourceAColt.size(); --row >= 0;) {
-                            double targetValue = vectorOfTargetsForSourceAColt.getQuick(row);
-                            if (targetValue != 0) {
-                                arrayOfTargetIndicesForSourceAColt[indices++] = row;
-                            }
-                        }
-//                        System.out.println("svSource.getIndex().size: " + sourceIndexes.length);
-                        listOfTargetIndicesForSourceAColt = new ArrayList();
-                        for (int s = 0; s < arrayOfTargetIndicesForSourceAColt.length; s++) {
-                            listOfTargetIndicesForSourceAColt.add(arrayOfTargetIndicesForSourceAColt[s]);
-                        }
-                        arrayOfTargetIndicesForSourceBColt = new int[vectorOfTargetsForSourceBColt.cardinality()];
-                        indices = 0;
-                        for (int row = vectorOfTargetsForSourceBColt.size(); --row >= 0;) {
-                            double targetValue = vectorOfTargetsForSourceBColt.getQuick(row);
-                            if (targetValue != 0) {
-                                arrayOfTargetIndicesForSourceBColt[indices++] = row;
-                            }
-                        }
-//                        System.out.println("svSource.getIndex().size: " + sourceIndexes.length);
-                        listOfTargetIndicesForSourceBColt = new ArrayList();
-                        for (int s = 0; s < arrayOfTargetIndicesForSourceBColt.length; s++) {
-                            listOfTargetIndicesForSourceBColt.add(arrayOfTargetIndicesForSourceBColt[s]);
-                        }
-
-                        listOfTargetIndicesForSourceAColt.retainAll(listOfTargetIndicesForSourceBColt);
-                        if (listOfTargetIndicesForSourceAColt.size() >= minTargetsInCommon) {
-                            doCalculus(vectorOfTargetsForSourceAColt, vectorOfTargetsForSourceBColt, i, j);
+                    arrayOfTargetIndicesForSourceAColt = new int[vectorOfTargetsForSourceAColt.cardinality()];
+                    int indices = 0;
+                    for (int row = vectorOfTargetsForSourceAColt.size(); --row >= 0;) {
+                        double targetValue = vectorOfTargetsForSourceAColt.getQuick(row);
+                        if (targetValue != 0) {
+                            arrayOfTargetIndicesForSourceAColt[indices++] = row;
                         }
                     }
-                } else {
-                    similarityMatrixColt.set(i, j, 0);
+//                        System.out.println("svSource.getIndex().size: " + sourceIndexes.length);
+                    listOfTargetIndicesForSourceAColt = new ArrayList();
+                    for (int s = 0; s < arrayOfTargetIndicesForSourceAColt.length; s++) {
+                        listOfTargetIndicesForSourceAColt.add(arrayOfTargetIndicesForSourceAColt[s]);
+                    }
+                    arrayOfTargetIndicesForSourceBColt = new int[vectorOfTargetsForSourceBColt.cardinality()];
+                    indices = 0;
+                    for (int row = vectorOfTargetsForSourceBColt.size(); --row >= 0;) {
+                        double targetValue = vectorOfTargetsForSourceBColt.getQuick(row);
+                        if (targetValue != 0) {
+                            arrayOfTargetIndicesForSourceBColt[indices++] = row;
+                        }
+                    }
+//                        System.out.println("svSource.getIndex().size: " + sourceIndexes.length);
+                    listOfTargetIndicesForSourceBColt = new ArrayList();
+                    for (int s = 0; s < arrayOfTargetIndicesForSourceBColt.length; s++) {
+                        listOfTargetIndicesForSourceBColt.add(arrayOfTargetIndicesForSourceBColt[s]);
+                    }
+
+                    listOfTargetIndicesForSourceAColt.retainAll(listOfTargetIndicesForSourceBColt);
+                    double nbOfShareTargets = (double) listOfTargetIndicesForSourceAColt.size();
+                    if (nbOfShareTargets >= minTargetsInCommon) {
+                    sharedTargetsMatrixColt.setQuick(i, j, nbOfShareTargets);
+                        doCalculus(vectorOfTargetsForSourceAColt, vectorOfTargetsForSourceBColt, i, j);
+                    }
                 }
+                // I think it is not necessary to set zero values
+//                else {
+//                    similarityMatrixColt.set(i, j, 0d);
+//                    sharedTargetsMatrixColt.set(i, j, 0d);
+//                }
 
             }
         }
     }
 
-    void doCalculus(SparseDoubleMatrix1D source, SparseDoubleMatrix1D target, int i, int j) {
+    private void doCalculus(SparseDoubleMatrix1D source, SparseDoubleMatrix1D target, int i, int j) {
         double normI = normsColt.get(i);
         double normJ = normsColt.get(j);
         double dotProduct = source.zDotProduct(target);
         double result = dotProduct / (normI * normJ);
         similarityMatrixColt.set(i, j, result);
     }
+
+    public SparseDoubleMatrix2D getSimilarityMatrixColt() {
+        return similarityMatrixColt;
+    }
+
+    public SparseDoubleMatrix2D getSharedTargetsMatrixColt() {
+        return sharedTargetsMatrixColt;
+    }
+
 }

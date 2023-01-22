@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import net.clementlevallois.utils.UnDirectedPair;
+import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.Graph;
 import org.gephi.graph.api.GraphController;
@@ -45,31 +46,38 @@ public class SimilarityFunction {
             double cosineThreshold = 0.05;
             int maxNbTargetsPerSourceConsidered4CosineCalc = 1000;
 
-            SparseDoubleMatrix2D similarityMatrixColt;
 
             MatrixBuilder matrixBuilder = new MatrixBuilder(sourcesAndTargets, maxNbTargetsPerSourceConsidered4CosineCalc);
 
             SparseDoubleMatrix1D[] listVectors = matrixBuilder.createListOfSparseVectorsFromEdgeList();
 
-            similarityMatrixColt = new SparseDoubleMatrix2D(listVectors.length, listVectors.length);
 
-            Thread t = new Thread(new CosineCalculation(listVectors, similarityMatrixColt, minTargetsInCommon));
-            t.start();
-            t.join();
+            CosineCalculation cosineCalculation = new CosineCalculation(listVectors, minTargetsInCommon);
+            cosineCalculation.run();
 
-            IntArrayList rowList = new IntArrayList();
-            IntArrayList columnList = new IntArrayList();
-            DoubleArrayList valueList = new DoubleArrayList();
-            similarityMatrixColt.getNonZeros(rowList, columnList, valueList);
+            SparseDoubleMatrix2D similarityMatrixColt = cosineCalculation.getSimilarityMatrixColt();
+            SparseDoubleMatrix2D sharedTargetsMatrixColt = cosineCalculation.getSharedTargetsMatrixColt();
+            
+            
+            IntArrayList rowListSimMatrix = new IntArrayList();
+            IntArrayList columnListSimMatrix = new IntArrayList();
+            DoubleArrayList valueListSimMatrix = new DoubleArrayList();
+            IntArrayList rowListNumberSharedTargets = new IntArrayList();
+            IntArrayList columnListNumberSharedTargets = new IntArrayList();
+            DoubleArrayList valueListNumberSharedTargets = new DoubleArrayList();
+            similarityMatrixColt.getNonZeros(rowListSimMatrix, columnListSimMatrix, valueListSimMatrix);
+            sharedTargetsMatrixColt.getNonZeros(rowListNumberSharedTargets, columnListNumberSharedTargets, valueListNumberSharedTargets);
 
             int nonZeroCell = 0;
-            int nbOfNonZeroCells = rowList.size();
+            int nbOfNonZeroCells = rowListSimMatrix.size();
             Set<String> nodesString = new HashSet();
             Map<UnDirectedPair, Double> mapUnDirectedPairsToTheirWeight = new HashMap();
+            Map<UnDirectedPair, Double> mapUnDirectedPairsToTheirNumberOfSharedTargets = new HashMap();
             for (nonZeroCell = 0; nonZeroCell < nbOfNonZeroCells; nonZeroCell++) {
-                int rowIndex = rowList.get(nonZeroCell);
-                int colIndex = columnList.get(nonZeroCell);
-                double cellValue = valueList.get(nonZeroCell);
+                int rowIndex = rowListSimMatrix.get(nonZeroCell);
+                int colIndex = columnListSimMatrix.get(nonZeroCell);
+                double cellValueSim = valueListSimMatrix.get(nonZeroCell);
+                double cellValueNumberOfSharedTargets = valueListNumberSharedTargets.get(nonZeroCell);
 
                 String sourceLabel = matrixBuilder.getMapSourcesIndexToLabel().get(rowIndex);
                 String targetLabel = matrixBuilder.getMapSourcesIndexToLabel().get(colIndex);
@@ -78,7 +86,8 @@ public class SimilarityFunction {
                 nodesString.add(targetLabel);
 
                 UnDirectedPair newPair = new UnDirectedPair(sourceLabel, targetLabel);
-                mapUnDirectedPairsToTheirWeight.put(newPair, cellValue);
+                mapUnDirectedPairsToTheirWeight.put(newPair, cellValueSim);
+                mapUnDirectedPairsToTheirNumberOfSharedTargets.put(newPair, cellValueNumberOfSharedTargets);
             }
 
             ProjectController pc = Lookup.getDefault().lookup(ProjectController.class);
@@ -88,6 +97,9 @@ public class SimilarityFunction {
             //Get a graph model - it exists because we have a workspace
             gm = Lookup.getDefault().lookup(GraphController.class).getGraphModel(workspace);
 
+            Column sharedTargetsColumn = gm.getEdgeTable().addColumn("shared targets", Integer.class);
+
+            
             GraphFactory factory = gm.factory();
             graphResult = gm.getGraph();
 
@@ -100,8 +112,6 @@ public class SimilarityFunction {
             }
             graphResult.addAllNodes(nodes);
 
-            Map<Edge, Double> mapEdgesToTheirWeight = new HashMap();
-
             Set<Edge> edgesForGraph = new HashSet();
             Edge edge;
             Iterator<Map.Entry<UnDirectedPair, Double>> iteratorEdgesToCreate = mapUnDirectedPairsToTheirWeight.entrySet().iterator();
@@ -110,8 +120,11 @@ public class SimilarityFunction {
                 Node nodeSource = graphResult.getNode(entry.getKey().getLeft());
                 Node nodeTarget = graphResult.getNode(entry.getKey().getRight());
                 edge = factory.newEdge(nodeSource, nodeTarget, 0, entry.getValue(), false);
+
+                int numberOfSharedTargets = mapUnDirectedPairsToTheirNumberOfSharedTargets.get(entry.getKey()).intValue();
+                edge.setAttribute(sharedTargetsColumn, numberOfSharedTargets);
+
                 edgesForGraph.add(edge);
-                mapEdgesToTheirWeight.put(edge, entry.getValue());
             }
 
             graphResult.addAllEdges(edgesForGraph);
@@ -125,7 +138,7 @@ public class SimilarityFunction {
             ec.exportWriter(stringWriter, exporterGexf);
             stringWriter.close();
             return stringWriter.toString();
-        } catch (IOException | InterruptedException ex) {
+        } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
 
