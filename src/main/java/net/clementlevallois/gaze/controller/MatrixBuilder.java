@@ -80,7 +80,6 @@ public class MatrixBuilder {
                 multisetTargets.addOne(mapTargetsLabelToIndex.get(target));
                 mapSourceIndexToTargetIndex.put(mapSourcesLabelToIndex.get(sourceNode), mapTargetsLabelToIndex.get(target));
             }
-
         }
         System.out.println("Number of different targets: " + multisetTargets.getElementSet().size());
         readingFile.closeAndPrintClock();
@@ -104,9 +103,12 @@ public class MatrixBuilder {
             int countTargets = 0;
 
             Set<Integer> targetsForThisSource = (Set<Integer>) mapSourceIndexToTargetIndex.get(currSource);
+            // the user can have a file where a source had zero target
+            if (targetsForThisSource == null){
+                targetsForThisSource = new HashSet();
+            }
             vectorColt = new SparseDoubleMatrix1D(multisetTargets.getElementSet().size());
             Iterator<Integer> targetsIt = targetsForThisSource.iterator();
-
             while (targetsIt.hasNext()) {
                 Integer nextTarget = targetsIt.next();
                 vectorColt.set((int) nextTarget, 1.00);
