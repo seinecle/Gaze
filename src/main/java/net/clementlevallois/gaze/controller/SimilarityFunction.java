@@ -46,19 +46,16 @@ public class SimilarityFunction {
             double cosineThreshold = 0.05;
             int maxNbTargetsPerSourceConsidered4CosineCalc = 1000;
 
-
             MatrixBuilder matrixBuilder = new MatrixBuilder(sourcesAndTargets, maxNbTargetsPerSourceConsidered4CosineCalc);
 
             SparseDoubleMatrix1D[] listVectors = matrixBuilder.createListOfSparseVectorsFromEdgeList();
-
 
             CosineCalculation cosineCalculation = new CosineCalculation(listVectors, minTargetsInCommon);
             cosineCalculation.run();
 
             SparseDoubleMatrix2D similarityMatrixColt = cosineCalculation.getSimilarityMatrixColt();
             SparseDoubleMatrix2D sharedTargetsMatrixColt = cosineCalculation.getSharedTargetsMatrixColt();
-            
-            
+
             IntArrayList rowListSimMatrix = new IntArrayList();
             IntArrayList columnListSimMatrix = new IntArrayList();
             DoubleArrayList valueListSimMatrix = new DoubleArrayList();
@@ -99,7 +96,6 @@ public class SimilarityFunction {
 
             Column sharedTargetsColumn = gm.getEdgeTable().addColumn("shared targets", Integer.class);
 
-            
             GraphFactory factory = gm.factory();
             graphResult = gm.getGraph();
 
@@ -110,6 +106,19 @@ public class SimilarityFunction {
                 node.setLabel(nodeString);
                 nodes.add(node);
             }
+
+            Set<Map.Entry<String, Set<String>>> entrySet = sourcesAndTargets.entrySet();
+            Iterator<Map.Entry<String, Set<String>>> iterator = entrySet.iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, Set<String>> nextEntry = iterator.next();
+                String source = nextEntry.getKey();
+                if (!nodesString.contains(source)) {
+                    node = factory.newNode(source);
+                    node.setLabel(source);
+                    nodes.add(node);
+                }
+            }
+
             graphResult.addAllNodes(nodes);
 
             Set<Edge> edgesForGraph = new HashSet();

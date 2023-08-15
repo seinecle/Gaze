@@ -52,7 +52,7 @@ public class MatrixBuilder {
         //#### 1. reading the map of sources and targets and creating indexes and maps from it
         //
         //***
-        Clock readingFile = new Clock("reading input file");
+//        Clock readingFile = new Clock("reading input file");
         Iterator<Entry<String, Set<String>>> iteratorInput = sourceAndTargets.entrySet().iterator();
         while (iteratorInput.hasNext()) {
             Entry<String, Set<String>> entry = iteratorInput.next();
@@ -81,15 +81,15 @@ public class MatrixBuilder {
                 mapSourceIndexToTargetIndex.put(mapSourcesLabelToIndex.get(sourceNode), mapTargetsLabelToIndex.get(target));
             }
         }
-        System.out.println("Number of different targets: " + multisetTargets.getElementSet().size());
-        readingFile.closeAndPrintClock();
+//        System.out.println("Number of different targets: " + multisetTargets.getElementSet().size());
+//        readingFile.closeAndPrintClock();
 
         //***
         //
         //#### 2. creating a matrix for pairwise comparisons
         //
         //***
-        Clock matrixCreation = new Clock("creating the adjacency matrix from the file");
+//        Clock matrixCreation = new Clock("creating the adjacency matrix from the file");
         //this creates a list of vectors equal to the number of nodes, or just number of sources,
         //depending on whether the network is directed or not
         // a vector is a list of elements which are going to be the stuff of the similarity calculation.
@@ -121,11 +121,11 @@ public class MatrixBuilder {
             //over which the cosine calculation will take place (see the CosineCalculation class)
             listVectorsColt[currSource] = vectorColt;
         }
-        System.out.println("adjacency matrix created!");
-        System.out.println("Number of sources (nb of vectors): " + listVectorsColt.length);
-        System.out.println("Number of targets (size of a given vector ): " + listVectorsColt[0].size());
-
-        matrixCreation.closeAndPrintClock();
+//        System.out.println("adjacency matrix created!");
+//        System.out.println("Number of sources (nb of vectors): " + listVectorsColt.length);
+//        System.out.println("Number of targets (size of a given vector ): " + listVectorsColt[0].size());
+//
+//        matrixCreation.closeAndPrintClock();
         return listVectorsColt;
     }
 
