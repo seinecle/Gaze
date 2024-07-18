@@ -101,10 +101,15 @@ public class SimilarityFunction {
 
             Set<Node> nodes = new HashSet();
             Node node;
+            Map<String, String> nodeLabelToId = new HashMap();
+            int i = 0;
             for (String nodeString : nodesString) {
-                node = factory.newNode(nodeString);
+                String id = String.valueOf(i);
+                nodeLabelToId.put(nodeString, id);
+                node = factory.newNode(id);
                 node.setLabel(nodeString);
                 nodes.add(node);
+                i++;
             }
 
             Set<Map.Entry<String, Set<String>>> entrySet = sourcesAndTargets.entrySet();
@@ -113,9 +118,12 @@ public class SimilarityFunction {
                 Map.Entry<String, Set<String>> nextEntry = iterator.next();
                 String source = nextEntry.getKey();
                 if (!nodesString.contains(source)) {
-                    node = factory.newNode(source);
+                    String id = String.valueOf(i);
+                    nodeLabelToId.put(source, id);
+                    node = factory.newNode(id);
                     node.setLabel(source);
                     nodes.add(node);
+                    i++;
                 }
             }
 
@@ -126,13 +134,13 @@ public class SimilarityFunction {
             Iterator<Map.Entry<UnDirectedPair, Double>> iteratorEdgesToCreate = mapUnDirectedPairsToTheirWeight.entrySet().iterator();
             while (iteratorEdgesToCreate.hasNext()) {
                 Map.Entry<UnDirectedPair, Double> entry = iteratorEdgesToCreate.next();
-                Node nodeSource = graphResult.getNode(entry.getKey().getLeft());
-                Node nodeTarget = graphResult.getNode(entry.getKey().getRight());
+                String nodeSourceLabel = (String) entry.getKey().getLeft();
+                String nodeTargetLabel = (String) entry.getKey().getRight();
+                Node nodeSource = graphResult.getNode(nodeLabelToId.get(nodeSourceLabel));
+                Node nodeTarget = graphResult.getNode(nodeLabelToId.get(nodeTargetLabel));
                 edge = factory.newEdge(nodeSource, nodeTarget, 0, entry.getValue(), false);
-
                 int numberOfSharedTargets = mapUnDirectedPairsToTheirNumberOfSharedTargets.get(entry.getKey()).intValue();
                 edge.setAttribute(sharedTargetsColumn, numberOfSharedTargets);
-
                 edgesForGraph.add(edge);
             }
 

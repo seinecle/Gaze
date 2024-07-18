@@ -29,19 +29,19 @@ import org.openide.util.Lookup;
  * @author LEVALLOIS
  */
 public class GazeFunctionTest {
-    
+
     @Test
-    public void similarityFunction(){
+    public void similarityFunction() {
         SimilarityFunction sim = new SimilarityFunction();
         Set<String> targets1 = Set.of("1", "2", "3");
         Set<String> targets2 = Set.of("1", "2", "3");
         Set<String> targets3 = Set.of("4", "5", "6");
-        
-        Map<String,Set<String>> sourcesAndTargets = new HashMap();
+
+        Map<String, Set<String>> sourcesAndTargets = new HashMap();
         sourcesAndTargets.put("A", targets1);
         sourcesAndTargets.put("B", targets2);
         sourcesAndTargets.put("C", targets3);
-        
+
         String gexf = sim.createSimilarityGraph(sourcesAndTargets, 1);
 
         ProjectController projectController = Lookup.getDefault().lookup(ProjectController.class);
@@ -49,23 +49,31 @@ public class GazeFunctionTest {
         ImportController importController = Lookup.getDefault().lookup(ImportController.class);
         projectController.newProject();
         Container container = null;
-            FileImporter fi = new ImporterGEXF();
-            container = importController.importFile(new StringReader(gexf), fi);
-            container.closeLoader();
+        FileImporter fi = new ImporterGEXF();
+        container = importController.importFile(new StringReader(gexf), fi);
+        container.closeLoader();
         DefaultProcessor processor = new DefaultProcessor();
         processor.setWorkspace(projectController.getCurrentWorkspace());
         processor.setContainers(new ContainerUnloader[]{container.getUnloader()});
         processor.process();
         GraphModel gm = graphController.getGraphModel();
-        
-        Node nodeA = gm.getGraph().getNode("A");
-        Node nodeB = gm.getGraph().getNode("B");
-        Node nodeC = gm.getGraph().getNode("C");
-        
+        Node nodeA = null;
+        Node nodeB = null;
+        Node nodeC = null;
+
+        for (Node node : gm.getGraph().getNodes()) {
+            switch (node.getLabel()) {
+                case "A" -> nodeA = node;
+                case "B" -> nodeB = node;
+                case "C" -> nodeC = node;
+            }
+
+        }
+
         Edge edgeAB = gm.getGraph().getEdge(nodeA, nodeB);
         Edge edgeAC = gm.getGraph().getEdge(nodeA, nodeC);
-        
-        Assert.assertEquals(1d, edgeAB.getWeight(),0d);
+
+        Assert.assertEquals(1d, edgeAB.getWeight(), 0d);
         Assert.assertNotNull(nodeC);
         Assert.assertNull(edgeAC);
 
