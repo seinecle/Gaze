@@ -40,7 +40,7 @@ public class SimilarityFunction {
         try {
             Graph graphResult;
             GraphModel gm;
-            Workspace workspace;
+
             boolean applyPMI = false;
 
             double cosineThreshold = 0.05;
@@ -87,74 +87,85 @@ public class SimilarityFunction {
                 mapUnDirectedPairsToTheirNumberOfSharedTargets.put(newPair, cellValueNumberOfSharedTargets);
             }
 
-            ProjectController pc = Lookup.getDefault().lookup(ProjectController.class);
-            pc.newProject();
-            workspace = pc.getCurrentWorkspace();
+            ProjectController pc = null;
+            Workspace workspace = null;
 
-            //Get a graph model - it exists because we have a workspace
-            gm = Lookup.getDefault().lookup(GraphController.class).getGraphModel(workspace);
+            try {
+                pc = Lookup.getDefault().lookup(ProjectController.class);
+                workspace = pc.newWorkspace(pc.newProject());
+                pc.openWorkspace(workspace);  // Open this specific workspace            
 
-            Column sharedTargetsColumn = gm.getEdgeTable().addColumn("shared targets", Integer.class);
+                // Get graph model for THIS workspace specifically
+                gm = Lookup.getDefault().lookup(GraphController.class).getGraphModel(workspace);
 
-            GraphFactory factory = gm.factory();
-            graphResult = gm.getGraph();
+                Column sharedTargetsColumn = gm.getEdgeTable().addColumn("shared targets", Integer.class);
 
-            Set<Node> nodes = new HashSet();
-            Node node;
-            Map<String, String> nodeLabelToId = new HashMap();
-            int i = 0;
-            for (String nodeString : nodesString) {
-                String id = String.valueOf(i);
-                nodeLabelToId.put(nodeString, id);
-                node = factory.newNode(id);
-                node.setLabel(nodeString);
-                nodes.add(node);
-                i++;
-            }
+                GraphFactory factory = gm.factory();
+                graphResult = gm.getGraph();
 
-            Set<Map.Entry<String, Set<String>>> entrySet = sourcesAndTargets.entrySet();
-            Iterator<Map.Entry<String, Set<String>>> iterator = entrySet.iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<String, Set<String>> nextEntry = iterator.next();
-                String source = nextEntry.getKey();
-                if (!nodesString.contains(source)) {
+                Set<Node> nodes = new HashSet();
+                Node node;
+                Map<String, String> nodeLabelToId = new HashMap();
+                int i = 0;
+                for (String nodeString : nodesString) {
                     String id = String.valueOf(i);
-                    nodeLabelToId.put(source, id);
+                    nodeLabelToId.put(nodeString, id);
                     node = factory.newNode(id);
-                    node.setLabel(source);
+                    node.setLabel(nodeString);
                     nodes.add(node);
                     i++;
                 }
+
+                Set<Map.Entry<String, Set<String>>> entrySet = sourcesAndTargets.entrySet();
+                Iterator<Map.Entry<String, Set<String>>> iterator = entrySet.iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry<String, Set<String>> nextEntry = iterator.next();
+                    String source = nextEntry.getKey();
+                    if (!nodesString.contains(source)) {
+                        String id = String.valueOf(i);
+                        nodeLabelToId.put(source, id);
+                        node = factory.newNode(id);
+                        node.setLabel(source);
+                        nodes.add(node);
+                        i++;
+                    }
+                }
+
+                graphResult.addAllNodes(nodes);
+
+                Set<Edge> edgesForGraph = new HashSet();
+                Edge edge;
+                Iterator<Map.Entry<UnDirectedPair, Double>> iteratorEdgesToCreate = mapUnDirectedPairsToTheirWeight.entrySet().iterator();
+                while (iteratorEdgesToCreate.hasNext()) {
+                    Map.Entry<UnDirectedPair, Double> entry = iteratorEdgesToCreate.next();
+                    String nodeSourceLabel = (String) entry.getKey().getLeft();
+                    String nodeTargetLabel = (String) entry.getKey().getRight();
+                    Node nodeSource = graphResult.getNode(nodeLabelToId.get(nodeSourceLabel));
+                    Node nodeTarget = graphResult.getNode(nodeLabelToId.get(nodeTargetLabel));
+                    edge = factory.newEdge(nodeSource, nodeTarget, 0, entry.getValue(), false);
+                    int numberOfSharedTargets = mapUnDirectedPairsToTheirNumberOfSharedTargets.get(entry.getKey()).intValue();
+                    edge.setAttribute(sharedTargetsColumn, numberOfSharedTargets);
+                    edgesForGraph.add(edge);
+                }
+
+                graphResult.addAllEdges(edgesForGraph);
+
+                ExportController ec = Lookup.getDefault().lookup(ExportController.class);
+                ExporterGEXF exporterGexf = (ExporterGEXF) ec.getExporter("gexf");
+                exporterGexf.setWorkspace(workspace);
+                exporterGexf.setExportDynamic(false);
+
+                StringWriter stringWriter = new StringWriter();
+                ec.exportWriter(stringWriter, exporterGexf);
+                stringWriter.close();
+                return stringWriter.toString();
+            } finally {
+                if (pc != null) {
+                    pc.closeCurrentWorkspace();
+                    pc.closeCurrentProject();
+                }
             }
 
-            graphResult.addAllNodes(nodes);
-
-            Set<Edge> edgesForGraph = new HashSet();
-            Edge edge;
-            Iterator<Map.Entry<UnDirectedPair, Double>> iteratorEdgesToCreate = mapUnDirectedPairsToTheirWeight.entrySet().iterator();
-            while (iteratorEdgesToCreate.hasNext()) {
-                Map.Entry<UnDirectedPair, Double> entry = iteratorEdgesToCreate.next();
-                String nodeSourceLabel = (String) entry.getKey().getLeft();
-                String nodeTargetLabel = (String) entry.getKey().getRight();
-                Node nodeSource = graphResult.getNode(nodeLabelToId.get(nodeSourceLabel));
-                Node nodeTarget = graphResult.getNode(nodeLabelToId.get(nodeTargetLabel));
-                edge = factory.newEdge(nodeSource, nodeTarget, 0, entry.getValue(), false);
-                int numberOfSharedTargets = mapUnDirectedPairsToTheirNumberOfSharedTargets.get(entry.getKey()).intValue();
-                edge.setAttribute(sharedTargetsColumn, numberOfSharedTargets);
-                edgesForGraph.add(edge);
-            }
-
-            graphResult.addAllEdges(edgesForGraph);
-
-            ExportController ec = Lookup.getDefault().lookup(ExportController.class);
-            ExporterGEXF exporterGexf = (ExporterGEXF) ec.getExporter("gexf");
-            exporterGexf.setWorkspace(workspace);
-            exporterGexf.setExportDynamic(false);
-
-            StringWriter stringWriter = new StringWriter();
-            ec.exportWriter(stringWriter, exporterGexf);
-            stringWriter.close();
-            return stringWriter.toString();
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }

@@ -50,58 +50,67 @@ public class CoocFunction {
                 allUndirectedPairs.addAllFromListOrSet(undirectedPairsAsListOneLine);
             }
 
-            ProjectController pc = Lookup.getDefault().lookup(ProjectController.class);
-            pc.newProject();
-            Workspace workspace = pc.getCurrentWorkspace();
+            ProjectController pc = null;
+            Workspace workspace = null;
+            try {
+                pc = Lookup.getDefault().lookup(ProjectController.class);
+                workspace = pc.newWorkspace(pc.newProject());
+                pc.openWorkspace(workspace);  // Open this specific workspace            
 
-            //Get a graph model - it exists because we have a workspace
-            GraphModel gm = Lookup.getDefault().lookup(GraphController.class).getGraphModel(workspace);
+                // Get graph model for THIS workspace specifically
+                GraphModel gm = Lookup.getDefault().lookup(GraphController.class).getGraphModel(workspace);
 
-            GraphFactory factory = gm.factory();
-            Graph graphResult = gm.getGraph();
+                GraphFactory factory = gm.factory();
+                Graph graphResult = gm.getGraph();
 
-            gm.getNodeTable().addColumn("countTerms", Integer.TYPE);
-            if (applyPMI) {
-                gm.getEdgeTable().addColumn("countEdge", Integer.TYPE);
-            }
-
-            Set<Node> nodes = new HashSet();
-            Node node;
-            for (String nodeString : nodesAsString.toListOfAllOccurrences()) {
-                node = factory.newNode(nodeString);
-                node.setLabel(nodeString);
-                node.setAttribute("countTerms", nodesAsString.getCount(nodeString));
-                nodes.add(node);
-            }
-            graphResult.addAllNodes(nodes);
-
-            Set<Edge> edgesForGraph = new HashSet();
-            Edge edge;
-            for (UnDirectedPair<String> edgeToCreate : allUndirectedPairs.getElementSet()) {
-                Node nodeSource = graphResult.getNode(edgeToCreate.getLeft());
-                Node nodeTarget = graphResult.getNode(edgeToCreate.getRight());
+                gm.getNodeTable().addColumn("countTerms", Integer.TYPE);
                 if (applyPMI) {
-                    int sourceCount = (Integer) nodeSource.getAttribute("countTerms");
-                    int targetCount = (Integer) nodeTarget.getAttribute("countTerms");
-                    float edgePMIWeight = (float) allUndirectedPairs.getCount(edgeToCreate) / (sourceCount * targetCount);
-                    edge = factory.newEdge(nodeSource, nodeTarget, 0, edgePMIWeight, false);
-                    edge.setAttribute("countEdge", allUndirectedPairs.getCount(edgeToCreate));
-                } else {
-                    edge = factory.newEdge(nodeSource, nodeTarget, 0, allUndirectedPairs.getCount(edgeToCreate), false);
+                    gm.getEdgeTable().addColumn("countEdge", Integer.TYPE);
                 }
-                edgesForGraph.add(edge);
+
+                Set<Node> nodes = new HashSet();
+                Node node;
+                for (String nodeString : nodesAsString.toListOfAllOccurrences()) {
+                    node = factory.newNode(nodeString);
+                    node.setLabel(nodeString);
+                    node.setAttribute("countTerms", nodesAsString.getCount(nodeString));
+                    nodes.add(node);
+                }
+                graphResult.addAllNodes(nodes);
+
+                Set<Edge> edgesForGraph = new HashSet();
+                Edge edge;
+                for (UnDirectedPair<String> edgeToCreate : allUndirectedPairs.getElementSet()) {
+                    Node nodeSource = graphResult.getNode(edgeToCreate.getLeft());
+                    Node nodeTarget = graphResult.getNode(edgeToCreate.getRight());
+                    if (applyPMI) {
+                        int sourceCount = (Integer) nodeSource.getAttribute("countTerms");
+                        int targetCount = (Integer) nodeTarget.getAttribute("countTerms");
+                        float edgePMIWeight = (float) allUndirectedPairs.getCount(edgeToCreate) / (sourceCount * targetCount);
+                        edge = factory.newEdge(nodeSource, nodeTarget, 0, edgePMIWeight, false);
+                        edge.setAttribute("countEdge", allUndirectedPairs.getCount(edgeToCreate));
+                    } else {
+                        edge = factory.newEdge(nodeSource, nodeTarget, 0, allUndirectedPairs.getCount(edgeToCreate), false);
+                    }
+                    edgesForGraph.add(edge);
+                }
+                graphResult.addAllEdges(edgesForGraph);
+
+                ExportController ec = Lookup.getDefault().lookup(ExportController.class);
+                ExporterGEXF exporterGexf = (ExporterGEXF) ec.getExporter("gexf");
+                exporterGexf.setWorkspace(workspace);
+                exporterGexf.setExportDynamic(false);
+
+                StringWriter stringWriter = new StringWriter();
+                ec.exportWriter(stringWriter, exporterGexf);
+                stringWriter.close();
+                return stringWriter.toString();
+            } finally {
+                if (pc != null) {
+                    pc.closeCurrentWorkspace();
+                    pc.closeCurrentProject();
+                }
             }
-            graphResult.addAllEdges(edgesForGraph);
-
-            ExportController ec = Lookup.getDefault().lookup(ExportController.class);
-            ExporterGEXF exporterGexf = (ExporterGEXF) ec.getExporter("gexf");
-            exporterGexf.setWorkspace(workspace);
-            exporterGexf.setExportDynamic(false);
-
-            StringWriter stringWriter = new StringWriter();
-            ec.exportWriter(stringWriter, exporterGexf);
-            stringWriter.close();
-            return stringWriter.toString();
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
             return "";
