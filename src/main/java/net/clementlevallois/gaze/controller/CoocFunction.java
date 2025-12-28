@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package net.clementlevallois.gaze.controller;
 
 import java.io.IOException;
@@ -32,7 +28,7 @@ import org.openide.util.Lookup;
  */
 public class CoocFunction {
 
-    public String createGraphFromCooccurrences(Map<Integer, Multiset<String>> inputLines, boolean applyPMI) {
+    public String createGraphFromCooccurrences(Map<Integer, Multiset<String>> inputLines, boolean applyPMI, int minInclusiveCooccurrences) {
         try {
             Iterator<Map.Entry<Integer, Multiset<String>>> iterator = inputLines.entrySet().iterator();
             FindAllPairs pairFinder;
@@ -48,6 +44,17 @@ public class CoocFunction {
                 }
                 Set<UnDirectedPair<String>> undirectedPairsAsListOneLine = pairFinder.getAllUndirectedPairsFromList(itemsOnOneLine.toListOfAllOccurrences());
                 allUndirectedPairs.addAllFromListOrSet(undirectedPairsAsListOneLine);
+            }
+
+            if (minInclusiveCooccurrences > 1) {
+                Multiset<UnDirectedPair<String>> temp = new Multiset();
+                for (UnDirectedPair<String> edgeLoop : allUndirectedPairs.getElementSet()) {
+                    Integer count = allUndirectedPairs.getCount(edgeLoop);
+                    if (count >= minInclusiveCooccurrences) {
+                        temp.addSeveral(edgeLoop, count);
+                    }
+                }
+                allUndirectedPairs = temp;
             }
 
             ProjectController pc = null;
