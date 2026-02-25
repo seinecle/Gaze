@@ -1,0 +1,6 @@
+net/clementlevallois/gaze/controller/Controller.class
+net/clementlevallois/gaze/controller/Pair.class
+net/clementlevallois/gaze/controller/SimilarityFunction.class
+net/clementlevallois/gaze/controller/CosineCalculation.class
+net/clementlevallois/gaze/controller/MatrixBuilder.class
+net/clementlevallois/gaze/controller/CoocFunction.class
